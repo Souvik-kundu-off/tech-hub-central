@@ -1,19 +1,20 @@
 import { useState } from "react";
 import PageLayout from "@/components/PageLayout";
-import { Search, Github, ExternalLink } from "lucide-react";
+import { Search, Github, ExternalLink, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
 
-const allProjects = [
-  { title: "PrepVerse", desc: "AI-powered interview prep platform with mock interviews and resume analysis.", stack: ["React", "Node.js", "OpenAI", "MongoDB"], author: "Rahul Sharma", category: "AI", github: "#", live: "#" },
-  { title: "CampusConnect", desc: "Social platform for students to share notes, form study groups, and collaborate on assignments.", stack: ["Next.js", "Supabase", "Tailwind CSS"], author: "Priya Patel", category: "Web", github: "#", live: "#" },
-  { title: "SmartAttend", desc: "Face-recognition attendance system for classrooms using computer vision and deep learning.", stack: ["Python", "OpenCV", "Flask", "TensorFlow"], author: "Arjun Mehta", category: "AI", github: "#", live: "#" },
-  { title: "EcoTrack", desc: "Mobile app to track and reduce personal carbon footprint with gamification and social challenges.", stack: ["React Native", "Firebase", "Charts.js"], author: "Sneha Gupta", category: "App", github: "#", live: "#" },
-  { title: "CodeBattle Arena", desc: "Real-time competitive coding platform with live leaderboards and multiplayer coding rooms.", stack: ["TypeScript", "Socket.io", "Redis", "PostgreSQL"], author: "Vikram Singh", category: "Web", github: "#", live: "#" },
-  { title: "DroneNav", desc: "Autonomous drone navigation system using GPS waypoints and obstacle avoidance sensors.", stack: ["Python", "ROS", "Arduino", "C++"], author: "Ananya Reddy", category: "Hardware", github: "#", live: "#" },
-  { title: "MedBot", desc: "AI chatbot for preliminary medical symptom analysis and doctor appointment scheduling.", stack: ["Python", "LangChain", "React", "FastAPI"], author: "Karan Joshi", category: "AI", github: "#", live: "#" },
-  { title: "BudgetBuddy", desc: "Personal finance tracker with expense categorization, budget goals, and visual reports.", stack: ["Flutter", "Firebase", "Dart"], author: "Meera Shah", category: "App", github: "#", live: "#" },
-  { title: "GitViz", desc: "Visualize your GitHub contribution graph in 3D with interactive exploration.", stack: ["Three.js", "React", "GitHub API"], author: "Rohan Verma", category: "Web", github: "#", live: "#" },
-];
+interface Project {
+  id: string;
+  title: string;
+  description: string;
+  stack: string[];
+  author_name: string;
+  category: string;
+  github_url: string;
+  live_url: string;
+}
 
 const categories = ["All", "AI", "Web", "App", "Hardware"];
 
@@ -21,9 +22,25 @@ const Projects = () => {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("All");
 
-  const filtered = allProjects
+  const { data: projects = [], isLoading } = useQuery({
+    queryKey: ["projects"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("projects")
+        .select("*")
+        .order("created_at", { ascending: false });
+      
+      if (error) throw error;
+      return data as Project[];
+    },
+  });
+
+  const filtered = projects
     .filter((p) => filter === "All" || p.category === filter)
-    .filter((p) => p.title.toLowerCase().includes(search.toLowerCase()) || p.desc.toLowerCase().includes(search.toLowerCase()));
+    .filter((p) => 
+      p.title.toLowerCase().includes(search.toLowerCase()) || 
+      p.description.toLowerCase().includes(search.toLowerCase())
+    );
 
   return (
     <PageLayout>
@@ -67,28 +84,32 @@ const Projects = () => {
             </div>
           </div>
 
-          {filtered.length === 0 ? (
+          {isLoading ? (
+            <div className="flex justify-center py-20">
+              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : filtered.length === 0 ? (
             <p className="text-muted-foreground text-sm py-20 text-center">No projects found.</p>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filtered.map((p, i) => (
-                <div key={i} className="border border-border rounded-lg p-5 bg-card hover:border-foreground/20 transition-colors flex flex-col">
+              {filtered.map((p) => (
+                <div key={p.id} className="border border-border rounded-lg p-5 bg-card hover:border-foreground/20 transition-colors flex flex-col">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-[11px] font-medium uppercase tracking-wider text-primary">{p.category}</span>
                     <div className="flex gap-2">
-                      <a href={p.github} className="text-muted-foreground hover:text-foreground transition-colors"><Github className="w-3.5 h-3.5" /></a>
-                      <a href={p.live} className="text-muted-foreground hover:text-foreground transition-colors"><ExternalLink className="w-3.5 h-3.5" /></a>
+                      <a href={p.github_url} className="text-muted-foreground hover:text-foreground transition-colors"><Github className="w-3.5 h-3.5" /></a>
+                      <a href={p.live_url} className="text-muted-foreground hover:text-foreground transition-colors"><ExternalLink className="w-3.5 h-3.5" /></a>
                     </div>
                   </div>
                   <h3 className="font-semibold text-[15px] mb-1.5">{p.title}</h3>
-                  <p className="text-[13px] text-muted-foreground leading-relaxed mb-4 flex-1">{p.desc}</p>
+                  <p className="text-[13px] text-muted-foreground leading-relaxed mb-4 flex-1">{p.description}</p>
                   <div className="flex flex-wrap gap-1.5 mb-3">
-                    {p.stack.map((t, j) => (
+                    {p.stack?.map((t, j) => (
                       <span key={j} className="text-[11px] px-2 py-0.5 rounded bg-accent text-muted-foreground">{t}</span>
                     ))}
                   </div>
                   <div className="pt-3 border-t border-border">
-                    <span className="text-xs text-muted-foreground">by {p.author}</span>
+                    <span className="text-xs text-muted-foreground">by {p.author_name}</span>
                   </div>
                 </div>
               ))}

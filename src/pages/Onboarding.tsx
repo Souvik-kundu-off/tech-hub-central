@@ -1,0 +1,243 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/lib/supabase";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { Loader2, User, BookOpen, Hash, Phone, Mail, Github, Linkedin, CheckCircle2 } from "lucide-react";
+
+const Onboarding = () => {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    full_name: "",
+    email: "",
+    student_code: "",
+    programme_name: "",
+    phone_number: "",
+    github_url: "",
+    linkedin_url: "",
+  });
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate("/login");
+        return;
+      }
+
+      // Pre-fill from OAuth metadata if available
+      const user = session.user;
+      setFormData(prev => ({
+        ...prev,
+        email: user.email || "",
+        full_name: user.user_metadata?.full_name || "",
+      }));
+
+      // Check if profile already completed
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("student_code, programme_name")
+        .eq("id", user.id)
+        .single();
+
+      if (profile?.student_code && profile?.programme_name) {
+        navigate("/");
+      }
+
+      setLoading(false);
+    };
+
+    checkSession();
+  }, [navigate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("No user found");
+
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          full_name: formData.full_name,
+          student_code: formData.student_code,
+          programme_name: formData.programme_name,
+          phone_number: formData.phone_number,
+          github_url: formData.github_url,
+          linkedin_url: formData.linkedin_url,
+        })
+        .eq("id", user.id);
+
+      if (error) throw error;
+
+      toast.success("Profile completed successfully!");
+      navigate("/");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to save profile");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background py-12 px-4 relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-primary/5 blur-[120px] -z-10" />
+      <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-primary/5 blur-[120px] -z-10" />
+
+      <div className="max-w-2xl mx-auto">
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 mb-6">
+            <User className="w-8 h-8 text-primary" />
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight mb-2">Complete your profile.</h1>
+          <p className="text-muted-foreground">Welcome to TechClub! Tell us a bit more about yourself to get started.</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-8 bg-card border border-border rounded-3xl p-8 shadow-sm">
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Essential Info */}
+            <div className="space-y-4 md:col-span-2">
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-primary flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4" /> Essential Details
+              </h3>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="full_name" className="text-xs uppercase tracking-wider text-muted-foreground ml-1">Full Name</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="full_name"
+                      required
+                      placeholder="John Doe"
+                      className="pl-9 h-10 bg-background border-border"
+                      value={formData.full_name}
+                      onChange={e => setFormData({ ...formData, full_name: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-xs uppercase tracking-wider text-muted-foreground ml-1">Email</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="email"
+                      disabled
+                      placeholder="john@college.edu"
+                      className="pl-9 h-10 bg-accent/50 border-border cursor-not-allowed opacity-70"
+                      value={formData.email}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="student_code" className="text-xs uppercase tracking-wider text-muted-foreground ml-1">Student Code</Label>
+                  <div className="relative">
+                    <Hash className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="student_code"
+                      required
+                      placeholder="e.g. CS2024001"
+                      className="pl-9 h-10 bg-background border-border"
+                      value={formData.student_code}
+                      onChange={e => setFormData({ ...formData, student_code: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="programme" className="text-xs uppercase tracking-wider text-muted-foreground ml-1">Programme Name</Label>
+                  <div className="relative">
+                    <BookOpen className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="programme"
+                      required
+                      placeholder="e.g. B.Tech Computer Science"
+                      className="pl-9 h-10 bg-background border-border"
+                      value={formData.programme_name}
+                      onChange={e => setFormData({ ...formData, programme_name: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Contact & Social */}
+            <div className="space-y-4 md:col-span-2 pt-4 border-t border-border">
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-primary flex items-center gap-2">
+                <Github className="w-4 h-4" /> Links & Contact
+              </h3>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="phone" className="text-xs uppercase tracking-wider text-muted-foreground ml-1">Phone Number</Label>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="phone"
+                      required
+                      type="tel"
+                      placeholder="+91 98765 43210"
+                      className="pl-9 h-10 bg-background border-border"
+                      value={formData.phone_number}
+                      onChange={e => setFormData({ ...formData, phone_number: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="github" className="text-xs uppercase tracking-wider text-muted-foreground ml-1">GitHub Profile (Optional)</Label>
+                  <div className="relative">
+                    <Github className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="github"
+                      placeholder="github.com/username"
+                      className="pl-9 h-10 bg-background border-border"
+                      value={formData.github_url}
+                      onChange={e => setFormData({ ...formData, github_url: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="linkedin" className="text-xs uppercase tracking-wider text-muted-foreground ml-1">LinkedIn Profile (Optional)</Label>
+                  <div className="relative">
+                    <Linkedin className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="linkedin"
+                      placeholder="linkedin.com/in/username"
+                      className="pl-9 h-10 bg-background border-border"
+                      value={formData.linkedin_url}
+                      onChange={e => setFormData({ ...formData, linkedin_url: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <Button 
+            disabled={submitting}
+            className="w-full h-11 text-[15px] bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl transition-all active:scale-[0.98]"
+          >
+            {submitting ? (
+              <Loader2 className="w-4 h-4 animate-spin mr-2" />
+            ) : null}
+            Complete Onboarding
+          </Button>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default Onboarding;

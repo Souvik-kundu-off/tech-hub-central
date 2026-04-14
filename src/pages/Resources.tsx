@@ -1,95 +1,98 @@
 import PageLayout from "@/components/PageLayout";
-import { BookOpen, FileText, Video, Wrench, ExternalLink } from "lucide-react";
+import { BookOpen, FileText, Video, Wrench, ExternalLink, Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
 
-const sections = [
-  {
-    icon: BookOpen,
-    title: "Roadmaps",
-    desc: "Curated learning paths for different tech domains.",
-    items: [
-      { name: "Frontend Development Roadmap", link: "#" },
-      { name: "Backend Development Roadmap", link: "#" },
-      { name: "Data Science & ML Roadmap", link: "#" },
-      { name: "Mobile App Development Roadmap", link: "#" },
-      { name: "DevOps & Cloud Roadmap", link: "#" },
-    ],
-  },
-  {
-    icon: FileText,
-    title: "Notes & PDFs",
-    desc: "Study materials shared by club members and mentors.",
-    items: [
-      { name: "DSA Complete Notes", link: "#" },
-      { name: "System Design Handbook", link: "#" },
-      { name: "Operating Systems Quick Reference", link: "#" },
-      { name: "DBMS Cheat Sheet", link: "#" },
-      { name: "Computer Networks Summary", link: "#" },
-    ],
-  },
-  {
-    icon: Video,
-    title: "Recorded Sessions",
-    desc: "Watch our past workshops and talks at your own pace.",
-    items: [
-      { name: "Intro to React — Workshop Recording", link: "#" },
-      { name: "Git & GitHub Masterclass", link: "#" },
-      { name: "Building REST APIs with Node.js", link: "#" },
-      { name: "ML for Beginners — Session 1–5", link: "#" },
-    ],
-  },
-  {
-    icon: Wrench,
-    title: "Tools & Links",
-    desc: "Useful tools and platforms we recommend.",
-    items: [
-      { name: "VS Code Setup Guide", link: "#" },
-      { name: "Free Hosting Platforms", link: "#" },
-      { name: "Design Resources (Figma, Icons)", link: "#" },
-      { name: "Competitive Programming Judges", link: "#" },
-    ],
-  },
-];
+interface ResourceItem {
+  id: string;
+  title: string;
+  category: string;
+  type: string;
+  link: string;
+}
 
-const Resources = () => (
-  <PageLayout>
-    <section className="section-padding border-b border-border">
-      <div className="container mx-auto px-4 text-center">
-        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1.5">Resources</p>
-        <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">Everything you need.</h1>
-        <p className="text-muted-foreground text-[15px] max-w-md mx-auto">
-          Roadmaps, notes, recorded sessions, and tools — curated by the community.
-        </p>
-      </div>
-    </section>
+const getIcon = (category: string) => {
+  switch (category.toLowerCase()) {
+    case 'roadmaps': return BookOpen;
+    case 'notes & pdfs': return FileText;
+    case 'recorded sessions': return Video;
+    case 'tools & links': return Wrench;
+    default: return FileText;
+  }
+};
 
-    <section className="section-padding">
-      <div className="container mx-auto px-4 space-y-12">
-        {sections.map((section, i) => (
-          <div key={i}>
-            <div className="flex items-center gap-3 mb-4">
-              <section.icon className="w-5 h-5 text-primary" />
-              <div>
-                <h2 className="font-semibold text-lg">{section.title}</h2>
-                <p className="text-xs text-muted-foreground">{section.desc}</p>
+const Resources = () => {
+  const { data: resources = [], isLoading } = useQuery({
+    queryKey: ["resources"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("resources")
+        .select("*")
+        .order("created_at", { ascending: true });
+      
+      if (error) throw error;
+      return data as ResourceItem[];
+    },
+  });
+
+  // Group resources by category
+  const categories = Array.from(new Set(resources.map(r => r.category)));
+  const sections = categories.map(cat => ({
+    title: cat,
+    icon: getIcon(cat),
+    items: resources.filter(r => r.category === cat)
+  }));
+
+  return (
+    <PageLayout>
+      <section className="section-padding border-b border-border">
+        <div className="container mx-auto px-4 text-center">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1.5">Resources</p>
+          <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">Everything you need.</h1>
+          <p className="text-muted-foreground text-[15px] max-w-md mx-auto">
+            Roadmaps, notes, recorded sessions, and tools — curated by the community.
+          </p>
+        </div>
+      </section>
+
+      <section className="section-padding">
+        <div className="container mx-auto px-4 space-y-12">
+          {isLoading ? (
+            <div className="flex justify-center py-20">
+              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : sections.length === 0 ? (
+            <p className="text-muted-foreground text-sm py-20 text-center">No resources found.</p>
+          ) : (
+            sections.map((section, i) => (
+              <div key={i}>
+                <div className="flex items-center gap-3 mb-4">
+                  <section.icon className="w-5 h-5 text-primary" />
+                  <div>
+                    <h2 className="font-semibold text-lg">{section.title}</h2>
+                  </div>
+                </div>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {section.items.map((item) => (
+                    <a
+                      key={item.id}
+                      href={item.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="border border-border rounded-lg p-4 bg-card hover:border-foreground/20 transition-colors flex items-center justify-between group"
+                    >
+                      <span className="text-sm">{item.title}</span>
+                      <ExternalLink className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground transition-colors shrink-0 ml-2" />
+                    </a>
+                  ))}
+                </div>
               </div>
-            </div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {section.items.map((item, j) => (
-                <a
-                  key={j}
-                  href={item.link}
-                  className="border border-border rounded-lg p-4 bg-card hover:border-foreground/20 transition-colors flex items-center justify-between group"
-                >
-                  <span className="text-sm">{item.name}</span>
-                  <ExternalLink className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground transition-colors shrink-0 ml-2" />
-                </a>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
-  </PageLayout>
-);
+            ))
+          )}
+        </div>
+      </section>
+    </PageLayout>
+  );
+};
 
 export default Resources;

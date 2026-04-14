@@ -1,18 +1,21 @@
 import { useState } from "react";
 import PageLayout from "@/components/PageLayout";
-import { Calendar, MapPin, Users, Clock } from "lucide-react";
+import { Calendar, MapPin, Users, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
 
-const allEvents = [
-  { title: "HackFusion 2026", date: "May 15–16, 2026", location: "Main Auditorium", type: "Hackathon", spots: 120, mode: "Offline", upcoming: true, desc: "48-hour hackathon with prizes worth ₹50,000. Build solutions for real-world problems." },
-  { title: "AI/ML Workshop Series", date: "Apr 28, 2026", location: "CS Lab 301", type: "Workshop", spots: 60, mode: "Offline", upcoming: true, desc: "Hands-on workshop covering neural networks, NLP, and computer vision basics." },
-  { title: "Code Wars — CP Contest", date: "May 3, 2026", location: "Online", type: "Competition", spots: 200, mode: "Online", upcoming: true, desc: "Competitive programming contest with problems from Div 2 to Div 1 level." },
-  { title: "Web Dev Bootcamp", date: "May 20, 2026", location: "Seminar Hall B", type: "Workshop", spots: 80, mode: "Offline", upcoming: true, desc: "Full-stack web development from scratch — React, Node, databases." },
-  { title: "Gaming Night", date: "Jun 1, 2026", location: "Student Center", type: "Gaming", spots: 50, mode: "Offline", upcoming: true, desc: "Valorant and CS2 tournament with snacks and prizes." },
-  { title: "HackFusion 2025", date: "May 10, 2025", location: "Main Auditorium", type: "Hackathon", spots: 100, mode: "Offline", upcoming: false, desc: "Our flagship hackathon's previous edition." },
-  { title: "Python for Beginners", date: "Mar 15, 2025", location: "Online", type: "Workshop", spots: 150, mode: "Online", upcoming: false, desc: "Introductory Python workshop for absolute beginners." },
-  { title: "Design Thinking Workshop", date: "Feb 20, 2025", location: "CS Lab 201", type: "Workshop", spots: 40, mode: "Offline", upcoming: false, desc: "Learn the design thinking process and build user-centered solutions." },
-];
+interface Event {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  location: string;
+  type: string;
+  spots: number;
+  mode: string;
+  is_upcoming: boolean;
+}
 
 const filters = ["All", "Hackathon", "Workshop", "Competition", "Gaming"];
 
@@ -20,9 +23,21 @@ const Events = () => {
   const [tab, setTab] = useState<"upcoming" | "past">("upcoming");
   const [filter, setFilter] = useState("All");
 
-  const filtered = allEvents
-    .filter((e) => (tab === "upcoming" ? e.upcoming : !e.upcoming))
-    .filter((e) => filter === "All" || e.type === filter);
+  const { data: events = [], isLoading } = useQuery({
+    queryKey: ["events", tab],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("events")
+        .select("*")
+        .eq("is_upcoming", tab === "upcoming")
+        .order("created_at", { ascending: false });
+      
+      if (error) throw error;
+      return data as Event[];
+    },
+  });
+
+  const filtered = events.filter((e) => filter === "All" || e.type === filter);
 
   return (
     <PageLayout>
@@ -71,25 +86,29 @@ const Events = () => {
           </div>
 
           {/* Events Grid */}
-          {filtered.length === 0 ? (
+          {isLoading ? (
+            <div className="flex justify-center py-20">
+              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : filtered.length === 0 ? (
             <p className="text-muted-foreground text-sm py-20 text-center">No events found.</p>
           ) : (
             <div className="grid md:grid-cols-2 gap-4">
-              {filtered.map((event, i) => (
-                <div key={i} className="border border-border rounded-lg p-6 bg-card hover:border-foreground/20 transition-colors">
+              {filtered.map((event) => (
+                <div key={event.id} className="border border-border rounded-lg p-6 bg-card hover:border-foreground/20 transition-colors">
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-[11px] font-medium uppercase tracking-wider text-primary">{event.type}</span>
                     <span className="text-[11px] text-muted-foreground">•</span>
                     <span className="text-[11px] text-muted-foreground">{event.mode}</span>
                   </div>
                   <h3 className="font-semibold text-lg mb-2">{event.title}</h3>
-                  <p className="text-sm text-muted-foreground mb-4">{event.desc}</p>
+                  <p className="text-sm text-muted-foreground mb-4">{event.description}</p>
                   <div className="flex flex-wrap gap-4 text-[13px] text-muted-foreground mb-4">
                     <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> {event.date}</span>
                     <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" /> {event.location}</span>
                     <span className="flex items-center gap-1.5"><Users className="w-3.5 h-3.5" /> {event.spots} spots</span>
                   </div>
-                  {event.upcoming && (
+                  {event.is_upcoming && (
                     <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 text-xs h-8">
                       Register Now
                     </Button>
