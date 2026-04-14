@@ -1,123 +1,53 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, ExternalLink, Github, Star } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ArrowRight, ExternalLink, Github } from "lucide-react";
 
 const projects = [
-  {
-    title: "PrepVerse",
-    description: "AI-powered interview preparation platform with mock interviews and resume analysis.",
-    techStack: ["React", "Node.js", "OpenAI", "MongoDB"],
-    author: "Rahul Sharma",
-    stars: 42,
-    category: "AI",
-  },
-  {
-    title: "CampusConnect",
-    description: "Social platform for college students to share notes, find study groups, and collaborate.",
-    techStack: ["Next.js", "Supabase", "Tailwind"],
-    author: "Priya Patel",
-    stars: 38,
-    category: "Web",
-  },
-  {
-    title: "SmartAttend",
-    description: "Face-recognition based attendance system for classrooms using computer vision.",
-    techStack: ["Python", "OpenCV", "Flask", "TensorFlow"],
-    author: "Arjun Mehta",
-    stars: 55,
-    category: "AI",
-  },
-  {
-    title: "EcoTrack",
-    description: "Mobile app to track and reduce personal carbon footprint with gamification.",
-    techStack: ["React Native", "Firebase", "Charts"],
-    author: "Sneha Gupta",
-    stars: 29,
-    category: "App",
-  },
-  {
-    title: "CodeBattle Arena",
-    description: "Real-time competitive coding platform with live leaderboards and multiplayer rooms.",
-    techStack: ["TypeScript", "Socket.io", "Redis", "PostgreSQL"],
-    author: "Vikram Singh",
-    stars: 67,
-    category: "Web",
-  },
-  {
-    title: "DroneNav",
-    description: "Autonomous drone navigation system using GPS waypoints and obstacle avoidance.",
-    techStack: ["Python", "ROS", "Arduino", "C++"],
-    author: "Ananya Reddy",
-    stars: 34,
-    category: "Hardware",
-  },
+  { title: "PrepVerse", desc: "AI-powered interview prep platform with mock interviews and resume analysis.", stack: ["React", "Node.js", "OpenAI"], author: "Rahul S.", category: "AI" },
+  { title: "CampusConnect", desc: "Social platform for students to share notes, form study groups, and collaborate.", stack: ["Next.js", "Supabase", "Tailwind"], author: "Priya P.", category: "Web" },
+  { title: "SmartAttend", desc: "Face-recognition attendance system for classrooms using computer vision.", stack: ["Python", "OpenCV", "Flask"], author: "Arjun M.", category: "AI" },
+  { title: "EcoTrack", desc: "Track and reduce your carbon footprint with gamification and challenges.", stack: ["React Native", "Firebase"], author: "Sneha G.", category: "App" },
+  { title: "CodeBattle Arena", desc: "Real-time competitive coding platform with live leaderboards.", stack: ["TypeScript", "Socket.io", "Redis"], author: "Vikram S.", category: "Web" },
+  { title: "DroneNav", desc: "Autonomous drone navigation with GPS waypoints and obstacle avoidance.", stack: ["Python", "ROS", "Arduino"], author: "Ananya R.", category: "Hardware" },
 ];
 
-const FeaturedProjects = () => {
-  return (
-    <section className="py-24">
-      <div className="container mx-auto px-4">
-        <div className="flex items-end justify-between mb-12">
-          <div>
-            <p className="text-primary text-sm font-mono mb-2">// showcase</p>
-            <h2 className="font-display font-bold text-3xl md:text-4xl">
-              Featured <span className="gradient-text">Projects</span>
-            </h2>
-          </div>
-          <Link to="/projects">
-            <Button variant="ghost" className="text-primary hover:text-primary/80">
-              View all <ArrowRight className="w-4 h-4 ml-1" />
-            </Button>
-          </Link>
+const FeaturedProjects = () => (
+  <section className="section-padding border-t border-border">
+    <div className="container mx-auto px-4">
+      <div className="flex items-end justify-between mb-10">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1.5">Showcase</p>
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Featured Projects</h2>
         </div>
+        <Link to="/projects" className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+          View all <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
+      </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {projects.map((project, i) => (
-            <div
-              key={i}
-              className="glass rounded-xl p-6 hover:glow-border transition-all duration-300 group flex flex-col"
-            >
-              <div className="flex items-start justify-between mb-3">
-                <span className="text-xs font-mono px-2 py-1 rounded-md bg-primary/10 text-primary">
-                  {project.category}
-                </span>
-                <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Star className="w-3 h-3 fill-primary text-primary" /> {project.stars}
-                </span>
-              </div>
-
-              <h3 className="font-display font-bold text-lg text-foreground group-hover:text-primary transition-colors mb-2">
-                {project.title}
-              </h3>
-              <p className="text-sm text-muted-foreground leading-relaxed mb-4 flex-1">
-                {project.description}
-              </p>
-
-              <div className="flex flex-wrap gap-1.5 mb-4">
-                {project.techStack.map((tech, j) => (
-                  <span key={j} className="text-xs px-2 py-0.5 rounded-md bg-secondary text-muted-foreground">
-                    {tech}
-                  </span>
-                ))}
-              </div>
-
-              <div className="flex items-center justify-between pt-3 border-t border-border/30">
-                <span className="text-xs text-muted-foreground">by {project.author}</span>
-                <div className="flex gap-2">
-                  <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                    <Github className="w-4 h-4" />
-                  </a>
-                  <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                    <ExternalLink className="w-4 h-4" />
-                  </a>
-                </div>
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {projects.map((p, i) => (
+          <div key={i} className="group border border-border rounded-lg p-5 hover:border-foreground/20 transition-colors bg-card flex flex-col">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[11px] font-medium uppercase tracking-wider text-primary">{p.category}</span>
+            </div>
+            <h3 className="font-semibold text-[15px] mb-1.5 group-hover:text-primary transition-colors">{p.title}</h3>
+            <p className="text-[13px] text-muted-foreground leading-relaxed mb-4 flex-1">{p.desc}</p>
+            <div className="flex flex-wrap gap-1.5 mb-4">
+              {p.stack.map((t, j) => (
+                <span key={j} className="text-[11px] px-2 py-0.5 rounded bg-accent text-muted-foreground">{t}</span>
+              ))}
+            </div>
+            <div className="flex items-center justify-between pt-3 border-t border-border">
+              <span className="text-xs text-muted-foreground">{p.author}</span>
+              <div className="flex gap-2">
+                <a href="#" className="text-muted-foreground hover:text-foreground transition-colors"><Github className="w-3.5 h-3.5" /></a>
+                <a href="#" className="text-muted-foreground hover:text-foreground transition-colors"><ExternalLink className="w-3.5 h-3.5" /></a>
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
-    </section>
-  );
-};
+    </div>
+  </section>
+);
 
 export default FeaturedProjects;
