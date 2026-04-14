@@ -1,46 +1,36 @@
 import { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/contexts/AuthContext";
+
 
 const OnboardingCheck = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { profile, loading, session } = useAuth();
 
   useEffect(() => {
-    const checkProfile = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session) {
-        // If we are on login/signup/onboarding, don't redirect away to onboarding (except if needed)
-        const isAuthPage = ["/login", "/signup", "/onboarding"].includes(location.pathname);
-        
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("student_code, programme_name")
-          .eq("id", session.user.id)
-          .single();
+    if (loading || !session || !profile) return;
 
-        if (!profile?.student_code || !profile?.programme_name) {
-          if (location.pathname !== "/onboarding") {
-            navigate("/onboarding");
-          }
-        } else if (location.pathname === "/onboarding") {
-          // If profile is complete but user is on onboarding, send them home
-          navigate("/");
-        }
+    // Skip onboarding check for admins
+    if (profile.role === "admin") return;
+
+    const isAuthPage = ["/login", "/signup"].includes(location.pathname);
+    const isOnboardingPage = location.pathname === "/onboarding";
+    const hasOnboarded = !!(profile.student_code && profile.programme_name);
+
+    if (!hasOnboarded) {
+      if (!isOnboardingPage) {
+        navigate("/onboarding");
       }
-    };
-
-    checkProfile();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "SIGNED_IN") {
-        checkProfile();
+    } else {
+      // If user is already onboarded, don't let them stay on auth or onboarding pages
+      if (isAuthPage || isOnboardingPage) {
+        navigate("/");
       }
-    });
+    }
 
-    return () => subscription.unsubscribe();
-  }, [navigate, location.pathname]);
+  }, [navigate, location.pathname, profile, loading, session]);
+
 
   return <>{children}</>;
 };

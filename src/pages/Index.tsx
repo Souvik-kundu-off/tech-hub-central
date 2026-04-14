@@ -9,24 +9,20 @@ import FeaturedProjects from "@/components/home/FeaturedProjects";
 import SponsorsSection from "@/components/home/SponsorsSection";
 import CTASection from "@/components/home/CTASection";
 import Footer from "@/components/Footer";
+import { Link, useNavigate } from "react-router-dom";
 import { Session } from "@supabase/supabase-js";
 
+import { useAuth } from "@/contexts/AuthContext";
+
 const Index = () => {
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { session, role, loading } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setLoading(false);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+    if (!loading && role === "admin") {
+      navigate("/admin");
+    }
+  }, [loading, role, navigate]);
 
   if (loading) {
     return (
@@ -35,6 +31,7 @@ const Index = () => {
       </div>
     );
   }
+
 
   return (
     <div className="min-h-screen bg-background">

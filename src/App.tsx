@@ -17,20 +17,27 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Onboarding from "./pages/Onboarding";
 import Profile from "./pages/Profile";
+import AdminDashboard from "./pages/AdminDashboard";
 import AdminReview from "./pages/AdminReview";
 import OnboardingCheck from "./components/auth/OnboardingCheck";
 import NotFound from "./pages/NotFound";
+import GlobalAlertBanner from "./components/GlobalAlertBanner";
+
+import { AuthProvider } from "./contexts/AuthContext";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <OnboardingCheck>
-          <Routes>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <GlobalAlertBanner />
+          <OnboardingCheck>
+            <Routes>
+
             <Route path="/" element={<Index />} />
             <Route path="/about" element={<About />} />
             <Route path="/events" element={<Events />} />
@@ -45,13 +52,16 @@ const App = () => (
             <Route path="/signup" element={<Signup />} />
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin-review" element={<AdminReview />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </OnboardingCheck>
       </BrowserRouter>
     </TooltipProvider>
-  </QueryClientProvider>
+  </AuthProvider>
+</QueryClientProvider>
 );
+
 
 export default App;

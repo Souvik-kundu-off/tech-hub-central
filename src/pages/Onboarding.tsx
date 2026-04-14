@@ -7,9 +7,11 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Loader2, User, BookOpen, Hash, Phone, Mail, Github, Linkedin, CheckCircle2 } from "lucide-react";
 
+import { useAuth } from "@/contexts/AuthContext";
+
 const Onboarding = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
+  const { session, profile, loading: authLoading, refreshProfile } = useAuth();
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     full_name: "",
@@ -22,37 +24,21 @@ const Onboarding = () => {
   });
 
   useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate("/login");
-        return;
-      }
+    if (!authLoading && !session) {
+      navigate("/login");
+      return;
+    }
 
-      // Pre-fill from OAuth metadata if available
-      const user = session.user;
+    if (profile) {
       setFormData(prev => ({
         ...prev,
-        email: user.email || "",
-        full_name: user.user_metadata?.full_name || "",
+        email: session?.user?.email || prev.email,
+        full_name: profile.full_name || prev.full_name,
+        // Don't overwrite if user started typing? Basic pre-fill logic:
       }));
+    }
+  }, [authLoading, session, profile, navigate]);
 
-      // Check if profile already completed
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("student_code, programme_name")
-        .eq("id", user.id)
-        .single();
-
-      if (profile?.student_code && profile?.programme_name) {
-        navigate("/");
-      }
-
-      setLoading(false);
-    };
-
-    checkSession();
-  }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,6 +62,7 @@ const Onboarding = () => {
 
       if (error) throw error;
 
+      await refreshProfile();
       toast.success("Profile completed successfully!");
       navigate("/");
     } catch (error: any) {
@@ -85,7 +72,7 @@ const Onboarding = () => {
     }
   };
 
-  if (loading) {
+  if (authLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-6 h-6 animate-spin text-primary" />

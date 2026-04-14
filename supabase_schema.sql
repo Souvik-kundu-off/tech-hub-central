@@ -71,11 +71,23 @@ CREATE TABLE IF NOT EXISTS events (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
+-- 5. ANNOUNCEMENTS (Global Broadcasts)
+CREATE TABLE IF NOT EXISTS announcements (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  title TEXT NOT NULL,
+  content TEXT,
+  type TEXT DEFAULT 'info', -- 'info', 'warning', 'success', 'critical'
+  is_active BOOLEAN DEFAULT TRUE,
+  expires_at TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+);
+
 -- Set up Row Level Security (RLS)
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
 ALTER TABLE points_history ENABLE ROW LEVEL SECURITY;
 ALTER TABLE events ENABLE ROW LEVEL SECURITY;
+ALTER TABLE announcements ENABLE ROW LEVEL SECURITY;
 
 -- Policies
 DO $$ 
@@ -86,6 +98,12 @@ BEGIN
     END IF;
     IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can update own profile.') THEN
         CREATE POLICY "Users can update own profile." ON profiles FOR UPDATE USING (auth.uid() = id);
+    END IF;
+    -- NEW: Admins can update all profiles (for management)
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Admins can update all profiles.') THEN
+        CREATE POLICY "Admins can update all profiles." ON profiles FOR UPDATE USING (
+            EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
+        );
     END IF;
 
     -- Projects
@@ -105,7 +123,24 @@ BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can view own points history.') THEN
         CREATE POLICY "Users can view own points history." ON points_history FOR SELECT USING (auth.uid() = user_id);
     END IF;
+    -- NEW: Admins can manage points history
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Admins can manage points history.') THEN
+        CREATE POLICY "Admins can manage points history." ON points_history FOR ALL USING (
+            EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
+        );
+    END IF;
+
+    -- Announcements
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Announcements are viewable by everyone.') THEN
+        CREATE POLICY "Announcements are viewable by everyone." ON announcements FOR SELECT USING (true);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Admins can manage announcements.') THEN
+        CREATE POLICY "Admins can manage announcements." ON announcements FOR ALL USING (
+            EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
+        );
+    END IF;
 END $$;
+
 
 -- FUNCTION: Process project approval and award points
 CREATE OR REPLACE FUNCTION process_project_review()
@@ -187,3 +222,30 @@ CREATE TRIGGER on_profile_completed
   AFTER UPDATE OF student_code, programme_name ON profiles
   FOR EACH ROW
   EXECUTE PROCEDURE check_profile_completion();
+-- 6. RESOURCES (Community Library)
+CREATE TABLE IF NOT EXISTS resources (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT,
+  url TEXT NOT NULL,
+  type TEXT DEFAULT 'tool', -- 'tool', 'tutorial', 'template', 'guide'
+  category TEXT,
+  added_by UUID REFERENCES profiles(id) ON DELETE SET NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+);
+
+-- RLS for Resources
+ALTER TABLE resources ENABLE ROW LEVEL SECURITY;
+
+DO $$ 
+BEGIN
+    -- Resources Policies
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Resources are viewable by everyone.') THEN
+        CREATE POLICY "Resources are viewable by everyone." ON resources FOR SELECT USING (true);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Admins can manage resources.') THEN
+        CREATE POLICY "Admins can manage resources." ON resources FOR ALL USING (
+            EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
+        );
+    END IF;
+END $$;
