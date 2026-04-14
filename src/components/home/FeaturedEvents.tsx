@@ -1,90 +1,46 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Calendar, MapPin, Users } from "lucide-react";
+import { ArrowRight, Calendar, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const events = [
-  {
-    title: "HackFusion 2026",
-    date: "May 15–16, 2026",
-    location: "Main Auditorium",
-    type: "Hackathon",
-    attendees: 120,
-    color: "from-primary to-glow-purple",
-  },
-  {
-    title: "AI/ML Workshop Series",
-    date: "Apr 28, 2026",
-    location: "CS Lab 301",
-    type: "Workshop",
-    attendees: 60,
-    color: "from-glow-purple to-pink-500",
-  },
-  {
-    title: "Code Wars — Competitive Programming",
-    date: "May 3, 2026",
-    location: "Online",
-    type: "Competition",
-    attendees: 200,
-    color: "from-emerald-500 to-primary",
-  },
+  { title: "HackFusion 2026", date: "May 15–16", location: "Main Auditorium", type: "Hackathon", spots: "120 spots" },
+  { title: "AI/ML Workshop Series", date: "Apr 28", location: "CS Lab 301", type: "Workshop", spots: "60 spots" },
+  { title: "Code Wars — CP Contest", date: "May 3", location: "Online", type: "Competition", spots: "200 spots" },
 ];
 
-const FeaturedEvents = () => {
-  return (
-    <section className="py-24">
-      <div className="container mx-auto px-4">
-        <div className="flex items-end justify-between mb-12">
-          <div>
-            <p className="text-primary text-sm font-mono mb-2">// upcoming</p>
-            <h2 className="font-display font-bold text-3xl md:text-4xl">
-              Featured <span className="gradient-text">Events</span>
-            </h2>
-          </div>
-          <Link to="/events">
-            <Button variant="ghost" className="text-primary hover:text-primary/80">
-              View all <ArrowRight className="w-4 h-4 ml-1" />
-            </Button>
-          </Link>
+const FeaturedEvents = () => (
+  <section className="section-padding">
+    <div className="container mx-auto px-4">
+      <div className="flex items-end justify-between mb-10">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1.5">Upcoming</p>
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Featured Events</h2>
         </div>
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {events.map((event, i) => (
-            <div
-              key={i}
-              className="group glass rounded-xl overflow-hidden hover:glow-border transition-all duration-300"
-            >
-              <div className={`h-2 bg-gradient-to-r ${event.color}`} />
-              <div className="p-6">
-                <span className="text-xs font-mono px-2 py-1 rounded-md bg-primary/10 text-primary">
-                  {event.type}
-                </span>
-                <h3 className="font-display font-bold text-lg mt-3 mb-3 text-foreground group-hover:text-primary transition-colors">
-                  {event.title}
-                </h3>
-                <div className="flex flex-col gap-2 text-sm text-muted-foreground">
-                  <span className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4" /> {event.date}
-                  </span>
-                  <span className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4" /> {event.location}
-                  </span>
-                  <span className="flex items-center gap-2">
-                    <Users className="w-4 h-4" /> {event.attendees} attending
-                  </span>
-                </div>
-                <Button
-                  variant="outline"
-                  className="w-full mt-5 border-primary/30 text-primary hover:bg-primary/10"
-                >
-                  Register Now
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
+        <Link to="/events" className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+          View all <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
       </div>
-    </section>
-  );
-};
+
+      <div className="grid md:grid-cols-3 gap-4">
+        {events.map((event, i) => (
+          <div key={i} className="group border border-border rounded-lg p-5 hover:border-foreground/20 transition-colors bg-card">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[11px] font-medium uppercase tracking-wider text-primary">{event.type}</span>
+              <span className="text-[11px] text-muted-foreground">{event.spots}</span>
+            </div>
+            <h3 className="font-semibold text-[15px] mb-3 group-hover:text-primary transition-colors">{event.title}</h3>
+            <div className="flex flex-col gap-1.5 text-[13px] text-muted-foreground mb-4">
+              <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> {event.date}, 2026</span>
+              <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" /> {event.location}</span>
+            </div>
+            <Button variant="outline" size="sm" className="w-full text-xs h-8 border-border hover:bg-accent">
+              Register
+            </Button>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+);
 
 export default FeaturedEvents;

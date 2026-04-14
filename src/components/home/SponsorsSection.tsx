@@ -1,34 +1,21 @@
-const sponsors = [
-  "PrepVerse", "TechCorp", "DevHub", "CloudBase",
-  "InnoLabs", "CodeAcademy", "ByteWorks", "StackBuild",
-];
+const sponsors = ["PrepVerse", "TechCorp", "DevHub", "CloudBase", "InnoLabs", "CodeAcademy", "ByteWorks", "StackBuild"];
 
-const SponsorsSection = () => {
-  return (
-    <section className="py-20 relative">
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-secondary/10 to-background" />
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="text-center mb-10">
-          <p className="text-primary text-sm font-mono mb-2">// partners</p>
-          <h2 className="font-display font-bold text-3xl md:text-4xl">
-            Our <span className="gradient-text">Sponsors & Partners</span>
-          </h2>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {sponsors.map((name, i) => (
-            <div
-              key={i}
-              className="glass rounded-xl py-8 flex items-center justify-center hover:glow-border transition-all duration-300 group"
-            >
-              <span className="font-display font-bold text-lg text-muted-foreground group-hover:text-primary transition-colors">
-                {name}
-              </span>
-            </div>
-          ))}
-        </div>
+const SponsorsSection = () => (
+  <section className="section-padding border-t border-border">
+    <div className="container mx-auto px-4">
+      <div className="section-header">
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1.5">Partners</p>
+        <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Backed by the best</h2>
       </div>
-    </section>
-  );
-};
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {sponsors.map((name, i) => (
+          <div key={i} className="border border-border rounded-lg h-20 flex items-center justify-center hover:border-foreground/20 transition-colors bg-card">
+            <span className="font-semibold text-sm text-muted-foreground">{name}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+);
 
 export default SponsorsSection;

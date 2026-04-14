@@ -1,60 +1,43 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Target, Lightbulb, Users, Rocket } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ArrowRight, BookOpen, Code, Users, Trophy } from "lucide-react";
 
 const pillars = [
-  { icon: Lightbulb, title: "Learn", desc: "Workshops, bootcamps & mentorship" },
-  { icon: Rocket, title: "Build", desc: "Real-world projects & hackathons" },
-  { icon: Users, title: "Connect", desc: "Network with peers & industry" },
-  { icon: Target, title: "Compete", desc: "Code wars & tech challenges" },
+  { icon: BookOpen, title: "Learn", desc: "Workshops, bootcamps, and mentorship from industry professionals." },
+  { icon: Code, title: "Build", desc: "Real-world projects, hackathons, and open-source contributions." },
+  { icon: Users, title: "Connect", desc: "Network with peers, alumni, and tech industry leaders." },
+  { icon: Trophy, title: "Compete", desc: "Coding contests, tech quizzes, and national-level competitions." },
 ];
 
-const AboutPreview = () => {
-  return (
-    <section className="py-24 relative">
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-secondary/20 to-background" />
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
-          <div>
-            <p className="text-primary text-sm font-mono mb-2">// about us</p>
-            <h2 className="font-display font-bold text-3xl md:text-4xl mb-6">
-              More Than Just a <span className="gradient-text">Club</span>
-            </h2>
-            <p className="text-muted-foreground leading-relaxed mb-4">
-              We're a student-run tech community dedicated to bridging the gap between
-              classroom learning and industry-ready skills. From beginner-friendly workshops
-              to advanced hackathons, there's something for everyone.
-            </p>
-            <p className="text-muted-foreground leading-relaxed mb-8">
-              Founded in 2020, we've grown from 15 members to 200+ passionate technologists
-              who've built incredible projects, won national competitions, and landed
-              dream internships.
-            </p>
-            <Link to="/about">
-              <Button variant="outline" className="border-primary/30 text-primary hover:bg-primary/10">
-                Learn more about us <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </Link>
-          </div>
+const AboutPreview = () => (
+  <section className="section-padding border-t border-border">
+    <div className="container mx-auto px-4">
+      <div className="grid lg:grid-cols-2 gap-16 items-start">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1.5">About Us</p>
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-5">More than just a club.</h2>
+          <p className="text-muted-foreground text-[15px] leading-relaxed mb-4">
+            We're a student-run tech community bridging classroom learning and industry skills. From beginner-friendly workshops to national hackathons, there's a place for everyone.
+          </p>
+          <p className="text-muted-foreground text-[15px] leading-relaxed mb-6">
+            Founded in 2020, we've grown from 15 members to 200+ passionate technologists who've shipped real products, won competitions, and landed dream roles.
+          </p>
+          <Link to="/about" className="text-sm text-primary hover:underline inline-flex items-center gap-1">
+            Learn more <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            {pillars.map((pillar, i) => (
-              <div
-                key={i}
-                className="glass rounded-xl p-6 hover:glow-border transition-all duration-300 group"
-              >
-                <div className="w-10 h-10 rounded-lg gradient-primary flex items-center justify-center mb-3">
-                  <pillar.icon className="w-5 h-5 text-primary-foreground" />
-                </div>
-                <h3 className="font-display font-bold text-foreground mb-1">{pillar.title}</h3>
-                <p className="text-sm text-muted-foreground">{pillar.desc}</p>
-              </div>
-            ))}
-          </div>
+        <div className="grid grid-cols-2 gap-3">
+          {pillars.map((p, i) => (
+            <div key={i} className="border border-border rounded-lg p-5 hover:border-foreground/20 transition-colors bg-card">
+              <p.icon className="w-5 h-5 text-primary mb-3" />
+              <h3 className="font-semibold text-sm mb-1">{p.title}</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">{p.desc}</p>
+            </div>
+          ))}
         </div>
       </div>
-    </section>
-  );
-};
+    </div>
+  </section>
+);
 
 export default AboutPreview;
