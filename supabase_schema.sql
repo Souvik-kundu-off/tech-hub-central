@@ -1,7 +1,7 @@
 -- Enable UUID extension if not enabled
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Create profiles table safely
+-- 1. PROFILES: Create or Update
 CREATE TABLE IF NOT EXISTS profiles (
   id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
   full_name TEXT,
@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   student_code TEXT,
   programme_name TEXT,
   phone_number TEXT,
-  role TEXT,
+  role TEXT DEFAULT 'member',
   points INTEGER DEFAULT 0,
   projects_count INTEGER DEFAULT 0,
   wins_count INTEGER DEFAULT 0,
@@ -20,13 +20,14 @@ CREATE TABLE IF NOT EXISTS profiles (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
--- Ensure columns exist in profiles (in case table was created earlier)
+-- Resilience: Add columns if they missed the CREATE TABLE
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS student_code TEXT;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS programme_name TEXT;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS phone_number TEXT;
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS role TEXT DEFAULT 'member';
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS points INTEGER DEFAULT 0;
 
--- Create projects table safely
+-- 2. PROJECTS: Create or Update
 CREATE TABLE IF NOT EXISTS projects (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   title TEXT NOT NULL,
@@ -37,10 +38,26 @@ CREATE TABLE IF NOT EXISTS projects (
   category TEXT,
   github_url TEXT,
   live_url TEXT,
+  status TEXT DEFAULT 'pending',
+  review_note TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
--- Create events table safely
+-- Resilience: Ensure status and review_note exist for existing tables
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'pending';
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS review_note TEXT;
+
+-- 3. POINTS HISTORY
+CREATE TABLE IF NOT EXISTS points_history (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  amount INTEGER NOT NULL,
+  action_type TEXT NOT NULL,
+  description TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+);
+
+-- 4. EVENTS
 CREATE TABLE IF NOT EXISTS events (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   title TEXT NOT NULL,
@@ -54,87 +71,119 @@ CREATE TABLE IF NOT EXISTS events (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
--- Create blog_posts table safely
-CREATE TABLE IF NOT EXISTS blog_posts (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  title TEXT NOT NULL,
-  excerpt TEXT,
-  content TEXT,
-  category TEXT,
-  author_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
-  published_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
-);
-
--- Create contact_messages table safely
-CREATE TABLE IF NOT EXISTS contact_messages (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  name TEXT NOT NULL,
-  email TEXT NOT NULL,
-  subject TEXT,
-  message TEXT NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
-);
-
 -- Set up Row Level Security (RLS)
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
+ALTER TABLE points_history ENABLE ROW LEVEL SECURITY;
 ALTER TABLE events ENABLE ROW LEVEL SECURITY;
-ALTER TABLE blog_posts ENABLE ROW LEVEL SECURITY;
-ALTER TABLE contact_messages ENABLE ROW LEVEL SECURITY;
 
--- Policies (using DO blocks to avoid "already exists" errors)
+-- Policies
 DO $$ 
 BEGIN
+    -- Profiles
     IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Public profiles are viewable by everyone.') THEN
         CREATE POLICY "Public profiles are viewable by everyone." ON profiles FOR SELECT USING (true);
     END IF;
-    
-    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can insert their own profile.') THEN
-        CREATE POLICY "Users can insert their own profile." ON profiles FOR INSERT WITH CHECK (auth.uid() = id);
-    END IF;
-
     IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can update own profile.') THEN
         CREATE POLICY "Users can update own profile." ON profiles FOR UPDATE USING (auth.uid() = id);
     END IF;
 
+    -- Projects
     IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Projects are viewable by everyone.') THEN
         CREATE POLICY "Projects are viewable by everyone." ON projects FOR SELECT USING (true);
     END IF;
-
-    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Authenticated users can insert projects.') THEN
-        CREATE POLICY "Authenticated users can insert projects." ON projects FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can insert own projects.') THEN
+        CREATE POLICY "Users can insert own projects." ON projects FOR INSERT WITH CHECK (auth.uid() = author_id);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Admins can update all projects.') THEN
+        CREATE POLICY "Admins can update all projects." ON projects FOR UPDATE USING (
+            EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
+        );
     END IF;
 
-    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Events are viewable by everyone.') THEN
-        CREATE POLICY "Events are viewable by everyone." ON events FOR SELECT USING (true);
-    END IF;
-
-    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Blog posts are viewable by everyone.') THEN
-        CREATE POLICY "Blog posts are viewable by everyone." ON blog_posts FOR SELECT USING (true);
-    END IF;
-
-    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Anyone can insert contact messages.') THEN
-        CREATE POLICY "Anyone can insert contact messages." ON contact_messages FOR INSERT WITH CHECK (true);
+    -- Points History
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can view own points history.') THEN
+        CREATE POLICY "Users can view own points history." ON points_history FOR SELECT USING (auth.uid() = user_id);
     END IF;
 END $$;
 
--- Trigger for automatically creating profile after signup
+-- FUNCTION: Process project approval and award points
+CREATE OR REPLACE FUNCTION process_project_review()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- If project is marked as approved
+  IF (OLD.status != 'approved' AND NEW.status = 'approved') THEN
+    UPDATE profiles 
+    SET points = points + 50,
+        projects_count = projects_count + 1
+    WHERE id = NEW.author_id;
+
+    INSERT INTO points_history (user_id, amount, action_type, description)
+    VALUES (NEW.author_id, 50, 'PROJECT_APPROVED', 'Earned for project submission: ' || NEW.title);
+  END IF;
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- TRIGGER: Award points on approval
+DROP TRIGGER IF EXISTS on_project_approved ON projects;
+CREATE TRIGGER on_project_approved
+  AFTER UPDATE OF status ON projects
+  FOR EACH ROW
+  EXECUTE PROCEDURE process_project_review();
+
+-- FUNCTION: Handle new user (Signup) + Welcome Bonus
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
+DECLARE
+    initial_points INTEGER := 5;
 BEGIN
-  INSERT INTO public.profiles (id, full_name, email, avatar_url)
+  INSERT INTO public.profiles (id, full_name, email, avatar_url, points)
   VALUES (
     new.id, 
     new.raw_user_meta_data->>'full_name', 
     new.email,
-    new.raw_user_meta_data->>'avatar_url'
-  );
+    new.raw_user_meta_data->>'avatar_url',
+    initial_points
+  ) ON CONFLICT (id) DO NOTHING;
+
+  -- Ensure points log is created
+  IF NOT EXISTS (SELECT 1 FROM points_history WHERE user_id = new.id AND action_type = 'WELCOME_BONUS') THEN
+    INSERT INTO public.points_history (user_id, amount, action_type, description)
+    VALUES (new.id, initial_points, 'WELCOME_BONUS', 'Initial bonus for joining the hub!');
+  END IF;
+  
   RETURN new;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Drop trigger if exists and recreate
+-- TRIGGER: Create profile on signup
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
+
+-- FUNCTION: Check for profile completion rewards
+CREATE OR REPLACE FUNCTION check_profile_completion()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- If profile transitions to complete (all required fields filled)
+    IF (OLD.student_code IS NULL AND NEW.student_code IS NOT NULL AND 
+        OLD.programme_name IS NULL AND NEW.programme_name IS NOT NULL) THEN
+        
+        UPDATE profiles SET points = points + 10 WHERE id = NEW.id;
+        
+        INSERT INTO points_history (user_id, amount, action_type, description)
+        VALUES (NEW.id, 10, 'PROFILE_COMPLETE', 'Bonus for completing your profile details.');
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- TRIGGER: Reward on profile completion
+DROP TRIGGER IF EXISTS on_profile_completed ON profiles;
+CREATE TRIGGER on_profile_completed
+  AFTER UPDATE OF student_code, programme_name ON profiles
+  FOR EACH ROW
+  EXECUTE PROCEDURE check_profile_completion();

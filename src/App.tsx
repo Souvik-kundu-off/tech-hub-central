@@ -17,6 +17,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Onboarding from "./pages/Onboarding";
 import Profile from "./pages/Profile";
+import AdminReview from "./pages/AdminReview";
 import OnboardingCheck from "./components/auth/OnboardingCheck";
 import NotFound from "./pages/NotFound";
 
@@ -44,6 +45,7 @@ const App = () => (
             <Route path="/signup" element={<Signup />} />
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/admin-review" element={<AdminReview />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </OnboardingCheck>
