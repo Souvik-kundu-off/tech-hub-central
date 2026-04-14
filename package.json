@@ -8,8 +8,8 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "npm run build && wrangler dev",
-    "deploy": "npm run build && wrangler deploy",
+    "preview": "vite preview",
+    "deploy": "npm run build && wrangler pages deploy dist --project-name=tech-hub-central",
     "test": "vitest run",
     "test:watch": "vitest"
   },
