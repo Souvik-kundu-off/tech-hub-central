@@ -1,0 +1,5 @@
+name = "tech-hub-central"
+pages_build_output_dir = "dist"
+
+[compatibility_flags]
+"nodejs_compat" = true
