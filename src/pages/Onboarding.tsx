@@ -55,22 +55,31 @@ const Onboarding = () => {
 
       const { error } = await supabase
         .from("profiles")
-        .update({
+        .upsert({
+          id: user.id, // ID is required for upsert
           full_name: formData.full_name,
           student_code: formData.student_code,
           programme_name: formData.programme_name,
           phone_number: formData.phone_number,
           github_url: formData.github_url,
           linkedin_url: formData.linkedin_url,
-        })
-        .eq("id", user.id);
+        });
 
       if (error) throw error;
 
+      console.log("Onboarding: Profile saved, refreshing...");
       await refreshProfile();
+      
+      // Add a small delay for state to permeate
+      console.log("Onboarding: Refresh complete, navigating to dashboard...");
       toast.success("Profile completed successfully!");
-      navigate("/");
+      
+      // Use setTimeout to allow context update to trigger re-renders before navigation
+      setTimeout(() => {
+        navigate("/dashboard", { replace: true });
+      }, 100);
     } catch (error: any) {
+      console.error("Onboarding: Error saving profile", error);
       toast.error(error.message || "Failed to save profile");
     } finally {
       setSubmitting(false);

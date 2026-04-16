@@ -20,7 +20,7 @@ const MemberNavbar = () => {
   const location = useLocation();
 
   const navLinks = [
-    { label: "Dashboard", href: "/" },
+    { label: "Dashboard", href: "/dashboard" },
     { label: "Events", href: "/events" },
     { label: "Projects", href: "/projects" },
     { label: "Resources", href: "/resources" },
@@ -34,7 +34,7 @@ const MemberNavbar = () => {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/60 backdrop-blur-xl border-b border-white/5">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center gap-3 group">
+          <Link to="/dashboard" className="flex items-center gap-3 group">
             <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center transition-transform group-hover:scale-110">
               <Terminal className="w-4.5 h-4.5 text-primary" />
             </div>

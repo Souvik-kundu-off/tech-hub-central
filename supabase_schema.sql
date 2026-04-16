@@ -174,20 +174,31 @@ RETURNS trigger AS $$
 DECLARE
     initial_points INTEGER := 5;
 BEGIN
-  INSERT INTO public.profiles (id, full_name, email, avatar_url, points)
+  -- We use DO UPDATE to ensure the row exists and is fresh, 
+  -- which prevents Foreign Key failures in subsequent steps.
+  INSERT INTO public.profiles (id, full_name, email, avatar_url, points, role)
   VALUES (
     new.id, 
-    new.raw_user_meta_data->>'full_name', 
+    COALESCE(new.raw_user_meta_data->>'full_name', ''), 
     new.email,
-    new.raw_user_meta_data->>'avatar_url',
-    initial_points
-  ) ON CONFLICT (id) DO NOTHING;
+    COALESCE(new.raw_user_meta_data->>'avatar_url', ''),
+    initial_points,
+    'member'
+  ) 
+  ON CONFLICT (id) DO UPDATE SET
+    email = EXCLUDED.email,
+    full_name = CASE WHEN profiles.full_name IS NULL OR profiles.full_name = '' THEN EXCLUDED.full_name ELSE profiles.full_name END;
 
-  -- Ensure points log is created
-  IF NOT EXISTS (SELECT 1 FROM points_history WHERE user_id = new.id AND action_type = 'WELCOME_BONUS') THEN
-    INSERT INTO public.points_history (user_id, amount, action_type, description)
-    VALUES (new.id, initial_points, 'WELCOME_BONUS', 'Initial bonus for joining the hub!');
-  END IF;
+  -- Ensure points log is created, wrapped in its own sub-block to avoid failing the main user creation
+  BEGIN
+    IF NOT EXISTS (SELECT 1 FROM points_history WHERE user_id = new.id AND action_type = 'WELCOME_BONUS') THEN
+      INSERT INTO public.points_history (user_id, amount, action_type, description)
+      VALUES (new.id, initial_points, 'WELCOME_BONUS', 'Initial bonus for joining the hub!');
+    END IF;
+  EXCEPTION WHEN OTHERS THEN
+    -- Log error or just ignore it to ensure the user CAN at least sign in/be invited
+    RAISE WARNING 'Could not insert welcome bonus for user %: %', new.id, SQLERRM;
+  END;
   
   RETURN new;
 END;

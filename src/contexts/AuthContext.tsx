@@ -36,16 +36,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchProfile = async (userId: string) => {
     try {
+      console.log(`Auth: Fetching profile for ${userId}...`);
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", userId)
-        .single();
+        .maybeSingle(); // Use maybeSingle to avoid throw on missing row
       
-      if (error) throw error;
-      setProfile(data);
+      if (error) {
+        console.error("Auth: Profile fetch error:", error);
+        setProfile(null);
+        return;
+      }
+
+      if (data) {
+        console.log("Auth: Profile loaded successfully", data.role);
+        setProfile(data);
+      } else {
+        console.warn("Auth: No profile row found in database");
+        setProfile(null);
+      }
     } catch (error) {
-      console.error("Error fetching profile:", error);
+      console.error("Auth: Unexpected error fetching profile:", error);
       setProfile(null);
     }
   };

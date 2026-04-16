@@ -20,10 +20,10 @@ const Index = () => {
   const [timedOut, setTimedOut] = useState(false);
 
   useEffect(() => {
-    if (!loading && role === "admin") {
+    if (!loading && session && role === "admin") {
       navigate("/admin");
     }
-  }, [loading, role, navigate]);
+  }, [loading, session, role, navigate]);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
