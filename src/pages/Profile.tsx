@@ -39,39 +39,39 @@ interface ProfileData {
   wins_count: number;
 }
 
+import { useAuth } from "@/contexts/AuthContext";
+
 const Profile = () => {
   const navigate = useNavigate();
+  const { profile: authProfile, loading: authLoading, refreshProfile } = useAuth();
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [formData, setFormData] = useState<Partial<ProfileData>>({});
+  const [timedOut, setTimedOut] = useState(false);
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
+    if (!authLoading) {
+      if (!authProfile) {
         navigate("/login");
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", session.user.id)
-        .single();
-
-      if (error) {
-        toast.error("Failed to load profile");
       } else {
-        setProfile(data);
-        setFormData(data);
+        setProfile(authProfile as ProfileData);
+        setFormData(authProfile as ProfileData);
+        setLoading(false);
       }
-      setLoading(false);
-    };
+    }
+  }, [authLoading, authProfile, navigate]);
 
-    fetchProfile();
-  }, [navigate]);
+  useEffect(() => {
+    if (loading) {
+      const timer = setTimeout(() => {
+        if (loading) setTimedOut(true);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [loading]);
+
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,11 +102,27 @@ const Profile = () => {
     }
   };
 
-  if (loading) {
+  if (loading && !timedOut) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <p className="text-xs text-muted-foreground animate-pulse font-medium">Loading Identity...</p>
+        </div>
       </div>
+    );
+  }
+
+  if (timedOut && !profile) {
+    return (
+      <PageLayout>
+        <div className="flex flex-col items-center justify-center py-40">
+          <X size={48} className="text-destructive mb-4" />
+          <h1 className="text-2xl font-bold">Session Timeout</h1>
+          <p className="text-muted-foreground text-sm">We couldn't synchronize your profile. Please check your connection.</p>
+          <Button variant="outline" className="mt-6" onClick={() => window.location.reload()}>Retry</Button>
+        </div>
+      </PageLayout>
     );
   }
 

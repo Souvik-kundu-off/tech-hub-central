@@ -8,6 +8,12 @@ interface Profile {
   role: string;
   student_code?: string;
   programme_name?: string;
+  phone_number?: string;
+  github_url?: string;
+  linkedin_url?: string;
+  points?: number;
+  projects_count?: number;
+  wins_count?: number;
 }
 
 interface AuthContextType {
@@ -32,7 +38,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .select("full_name, avatar_url, role, student_code, programme_name")
+        .select("*")
         .eq("id", userId)
         .single();
       
@@ -47,25 +53,49 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const lastUserId = React.useRef<string | null>(null);
 
   useEffect(() => {
-    // Check active sessions and sets the user
-    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
-      setSession(initialSession);
-      const user = initialSession?.user ?? null;
-      setUser(user);
-      if (user) {
-        lastUserId.current = user.id;
-        fetchProfile(user.id).finally(() => setLoading(false));
-      } else {
-        setLoading(false);
+    let mounted = true;
+
+    const initialize = async () => {
+      try {
+        console.log("Auth: Initializing...");
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
+        
+        if (!mounted) return;
+
+        setSession(initialSession);
+        const initialUser = initialSession?.user ?? null;
+        setUser(initialUser);
+
+        if (initialUser) {
+          console.log("Auth: Session found for user", initialUser.id);
+          lastUserId.current = initialUser.id;
+          await fetchProfile(initialUser.id);
+        } else {
+          console.log("Auth: No session found");
+        }
+      } catch (error) {
+        console.error("Auth: Initialization error", error);
+      } finally {
+        if (mounted) {
+          setLoading(false);
+          console.log("Auth: Initialization complete");
+        }
       }
-    });
+    };
+
+    initialize();
 
     // Listen for changes on auth state (logged in, signed out, etc.)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
+      console.log(`Auth: Event [${event}] triggered`);
+      
+      if (!mounted) return;
+
       setSession(currentSession);
       const newUser = currentSession?.user ?? null;
       
       if (newUser?.id !== lastUserId.current) {
+        console.log(`Auth: User changed ${lastUserId.current} -> ${newUser?.id}`);
         lastUserId.current = newUser?.id ?? null;
         setUser(newUser);
         
@@ -75,13 +105,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } else {
           setProfile(null);
         }
+        setLoading(false);
+      } else if (event === 'SIGNED_OUT') {
+        // Force reset if signed out even if ID matches (though ID should be null/diff)
+        setProfile(null);
+        setLoading(false);
       }
-      setLoading(false);
     });
 
-
-
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
   }, []);

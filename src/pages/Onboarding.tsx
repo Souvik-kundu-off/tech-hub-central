@@ -29,6 +29,11 @@ const Onboarding = () => {
       return;
     }
 
+    if (!authLoading && profile?.role === "admin") {
+      navigate("/");
+      return;
+    }
+
     if (profile) {
       setFormData(prev => ({
         ...prev,

@@ -11,8 +11,13 @@ const OnboardingCheck = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (loading || !session || !profile) return;
 
-    // Skip onboarding check for admins
-    if (profile.role === "admin") return;
+    // Skip onboarding check for admins, but also move them away from the onboarding page if they land there
+    if (profile.role === "admin") {
+      if (location.pathname === "/onboarding") {
+        navigate("/");
+      }
+      return;
+    }
 
     const isAuthPage = ["/login", "/signup"].includes(location.pathname);
     const isOnboardingPage = location.pathname === "/onboarding";

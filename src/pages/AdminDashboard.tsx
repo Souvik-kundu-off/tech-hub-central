@@ -28,18 +28,31 @@ import { useAuth } from "@/contexts/AuthContext";
 const AdminDashboard = () => {
   const { role, loading: authLoading } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [timedOut, setTimedOut] = useState(false);
   
   const activeTab = searchParams.get("tab") || "projects";
 
-  if (authLoading) {
+  useEffect(() => {
+    if (authLoading) {
+      const timer = setTimeout(() => {
+        setTimedOut(true);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [authLoading]);
+
+  if (authLoading && !timedOut) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <p className="text-xs text-muted-foreground animate-pulse font-medium">Verifying Authority...</p>
+        </div>
       </div>
     );
   }
 
-  if (role !== "admin") {
+  if (role !== "admin" && !authLoading) {
     return (
       <PageLayout>
         <div className="flex flex-col items-center justify-center py-40">
