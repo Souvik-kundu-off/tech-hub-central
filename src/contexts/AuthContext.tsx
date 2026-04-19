@@ -33,6 +33,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [authReady, setAuthReady] = useState(false);
 
   const fetchProfile = async (userId: string) => {
     try {
@@ -67,63 +68,63 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     let mounted = true;
 
-    const initialize = async () => {
-      try {
-        console.log("Auth: Initializing...");
-        const { data: { session: initialSession } } = await supabase.auth.getSession();
-        
-        if (!mounted) return;
-
-        setSession(initialSession);
-        const initialUser = initialSession?.user ?? null;
-        setUser(initialUser);
-
-        if (initialUser) {
-          console.log("Auth: Session found for user", initialUser.id);
-          lastUserId.current = initialUser.id;
-          await fetchProfile(initialUser.id);
-        } else {
-          console.log("Auth: No session found");
-        }
-      } catch (error) {
-        console.error("Auth: Initialization error", error);
-      } finally {
-        if (mounted) {
-          setLoading(false);
-          console.log("Auth: Initialization complete");
-        }
-      }
-    };
-
-    initialize();
-
-    // Listen for changes on auth state (logged in, signed out, etc.)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
-      console.log(`Auth: Event [${event}] triggered`);
-      
+    const applySession = (currentSession: Session | null) => {
       if (!mounted) return;
 
       setSession(currentSession);
-      const newUser = currentSession?.user ?? null;
-      
-      if (newUser?.id !== lastUserId.current) {
-        console.log(`Auth: User changed ${lastUserId.current} -> ${newUser?.id}`);
-        lastUserId.current = newUser?.id ?? null;
-        setUser(newUser);
-        
-        if (newUser) {
-          setLoading(true);
-          await fetchProfile(newUser.id);
-        } else {
-          setProfile(null);
-        }
-        setLoading(false);
-      } else if (event === 'SIGNED_OUT') {
-        // Force reset if signed out even if ID matches (though ID should be null/diff)
+      const nextUser = currentSession?.user ?? null;
+      setUser(nextUser);
+      setLoading(true);
+
+      if (!nextUser) {
+        lastUserId.current = null;
         setProfile(null);
         setLoading(false);
+        return;
+      }
+
+      if (nextUser.id === lastUserId.current && authReady) {
+        setLoading(false);
+        return;
+      }
+
+      lastUserId.current = nextUser.id;
+      void fetchProfile(nextUser.id).finally(() => {
+        if (mounted) {
+          setLoading(false);
+        }
+      });
+    };
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, currentSession) => {
+      console.log(`Auth: Event [${event}] triggered`);
+      applySession(currentSession);
+      if (!authReady && mounted) {
+        setAuthReady(true);
       }
     });
+
+    supabase.auth.getSession()
+      .then(({ data: { session: initialSession } }) => {
+        if (!mounted) return;
+        console.log("Auth: Session restored", initialSession?.user?.id ?? "none");
+        applySession(initialSession);
+      })
+      .catch((error) => {
+        console.error("Auth: Initialization error", error);
+        if (mounted) {
+          setSession(null);
+          setUser(null);
+          setProfile(null);
+          setLoading(false);
+        }
+      })
+      .finally(() => {
+        if (mounted) {
+          setAuthReady(true);
+          console.log("Auth: Initialization complete");
+        }
+      });
 
     return () => {
       mounted = false;
