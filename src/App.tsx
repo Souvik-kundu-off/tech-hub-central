@@ -17,6 +17,8 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Onboarding from "./pages/Onboarding";
 import Profile from "./pages/Profile";
+import MyProjects from "./pages/MyProjects";
+import SubmitProject from "./pages/SubmitProject";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminReview from "./pages/AdminReview";
 import OnboardingCheck from "./components/auth/OnboardingCheck";
@@ -53,6 +55,9 @@ const App = () => (
             <Route path="/signup" element={<Signup />} />
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/my-projects" element={<MyProjects />} />
+            <Route path="/submit-project" element={<SubmitProject />} />
+            <Route path="/submit-project/:id" element={<SubmitProject />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin-review" element={<AdminReview />} />
             <Route path="*" element={<NotFound />} />
