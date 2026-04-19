@@ -27,6 +27,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface ProfileData {
   id: string;
@@ -66,6 +67,7 @@ interface Event {
 }
 
 const MemberHome = () => {
+  const { user, loading: authLoading } = useAuth();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [spotlightProject, setSpotlightProject] = useState<any | null>(null);
   const [userProjects, setUserProjects] = useState<Project[]>([]);
@@ -74,61 +76,74 @@ const MemberHome = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (authLoading) {
+      return;
+    }
+
+    if (!user) {
+      setProfile(null);
+      setSpotlightProject(null);
+      setUserProjects([]);
+      setPointsHistory([]);
+      setNextEvent(null);
+      setLoading(false);
+      return;
+    }
+
     const fetchData = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        const userId = session.user.id;
+      setLoading(true);
+      const userId = user.id;
 
-        // Fetch Profile
-        const { data: profileData } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", userId)
-          .single();
-        if (profileData) setProfile(profileData);
+      // Fetch Profile
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .single();
+      if (profileData) setProfile(profileData);
 
-        // Fetch Spotlight Project (Random approved project)
-        const { data: spotData } = await supabase
-          .from("projects")
-          .select("id, title, description, stack, author_name")
-          .eq("status", "approved")
-          .limit(10);
-        if (spotData && spotData.length > 0) {
-          setSpotlightProject(spotData[Math.floor(Math.random() * spotData.length)]);
-        }
-
-        // Fetch User's Projects
-        const { data: myProjects } = await supabase
-          .from("projects")
-          .select("*")
-          .eq("author_id", userId)
-          .order("created_at", { ascending: false });
-        if (myProjects) setUserProjects(myProjects);
-
-        // Fetch Points History
-        const { data: history } = await supabase
-          .from("points_history")
-          .select("*")
-          .eq("user_id", userId)
-          .order("created_at", { ascending: false })
-          .limit(5);
-        if (history) setPointsHistory(history);
-
-        // Fetch Next Event
-        const { data: eventData } = await supabase
-          .from("events")
-          .select("id, title, date, type, location")
-          .eq("is_upcoming", true)
-          .order("date", { ascending: true })
-          .limit(1)
-          .maybeSingle();
-        if (eventData) setNextEvent(eventData);
+      // Fetch Spotlight Project (Random approved project)
+      const { data: spotData } = await supabase
+        .from("projects")
+        .select("id, title, description, stack, author_name")
+        .eq("status", "approved")
+        .limit(10);
+      if (spotData && spotData.length > 0) {
+        setSpotlightProject(spotData[Math.floor(Math.random() * spotData.length)]);
       }
+
+      // Fetch User's Projects
+      const { data: myProjects } = await supabase
+        .from("projects")
+        .select("*")
+        .eq("author_id", userId)
+        .order("created_at", { ascending: false });
+      if (myProjects) setUserProjects(myProjects);
+
+      // Fetch Points History
+      const { data: history } = await supabase
+        .from("points_history")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(5);
+      if (history) setPointsHistory(history);
+
+      // Fetch Next Event
+      const { data: eventData } = await supabase
+        .from("events")
+        .select("id, title, date, type, location")
+        .eq("is_upcoming", true)
+        .order("date", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+      if (eventData) setNextEvent(eventData);
+
       setLoading(false);
     };
 
-    fetchData();
-  }, []);
+    void fetchData();
+  }, [authLoading, user]);
 
   const getRank = (points: number) => {
     if (points >= 1000) return { name: "Nexus Legend", icon: Star, color: "text-amber-500", progress: 100 };
@@ -149,7 +164,16 @@ const MemberHome = () => {
 
   const rank = getRank(profile?.points || 0);
 
-  if (loading) return null;
+  if (loading || authLoading) {
+    return (
+      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-muted-foreground">Loading your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen pt-24 pb-20 overflow-hidden">

@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/home/HeroSection";
 import MemberHome from "@/components/home/MemberHome";
@@ -9,34 +8,21 @@ import FeaturedProjects from "@/components/home/FeaturedProjects";
 import SponsorsSection from "@/components/home/SponsorsSection";
 import CTASection from "@/components/home/CTASection";
 import Footer from "@/components/Footer";
-import { Link, useNavigate } from "react-router-dom";
-import { Session } from "@supabase/supabase-js";
+import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
   const { session, role, loading } = useAuth();
   const navigate = useNavigate();
-  const [timedOut, setTimedOut] = useState(false);
 
   useEffect(() => {
     if (!loading && session && role === "admin") {
-      navigate("/admin");
+      navigate("/admin", { replace: true });
     }
   }, [loading, session, role, navigate]);
 
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (loading) {
-      timer = setTimeout(() => {
-        console.warn("Auth initialization is taking longer than expected. Showing fallback content.");
-        setTimedOut(true);
-      }, 5000); // 5 second safety break
-    }
-    return () => clearTimeout(timer);
-  }, [loading]);
-
-  if (loading && !timedOut) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
@@ -46,7 +32,6 @@ const Index = () => {
       </div>
     );
   }
-
 
   return (
     <div className="min-h-screen bg-background">
