@@ -42,6 +42,8 @@ const MemberManager = () => {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkPointsAmount, setBulkPointsAmount] = useState(10);
 
   useEffect(() => {
     fetchMembers();
@@ -114,6 +116,74 @@ const MemberManager = () => {
     m.programme_name?.toLowerCase().includes(search.toLowerCase())
   );
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === filtered.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filtered.map(m => m.id)));
+    }
+  };
+
+  const bulkAwardPoints = async () => {
+    if (selectedIds.size === 0) return;
+    if (!confirm(`Award ${bulkPointsAmount} points to ${selectedIds.size} selected members?`)) return;
+    setProcessing("bulk");
+
+    for (const memberId of selectedIds) {
+      const member = members.find(m => m.id === memberId);
+      if (!member) continue;
+
+      await supabase
+        .from("profiles")
+        .update({ points: member.points + bulkPointsAmount })
+        .eq("id", memberId);
+
+      await supabase.from("points_history").insert([{
+        user_id: memberId,
+        amount: bulkPointsAmount,
+        action_type: "ADMIN_BULK_ADJUSTMENT",
+        description: `Bulk award by Overseer: +${bulkPointsAmount} pts`
+      }]);
+    }
+
+    setMembers(prev => prev.map(m => 
+      selectedIds.has(m.id) ? { ...m, points: m.points + bulkPointsAmount } : m
+    ));
+    toast.success(`Awarded ${bulkPointsAmount} pts to ${selectedIds.size} members`);
+    setSelectedIds(new Set());
+    setProcessing(null);
+  };
+
+  const bulkEmail = () => {
+    if (selectedIds.size === 0) return;
+    const emails = members.filter(m => selectedIds.has(m.id)).map(m => m.email).join(",");
+    window.open(`mailto:${emails}`);
+  };
+
+  const bulkChangeRole = async (newRole: string) => {
+    if (selectedIds.size === 0) return;
+    if (!confirm(`Change ${selectedIds.size} members to ${newRole}?`)) return;
+    setProcessing("bulk");
+
+    for (const memberId of selectedIds) {
+      await supabase.from("profiles").update({ role: newRole }).eq("id", memberId);
+    }
+
+    setMembers(prev => prev.map(m => selectedIds.has(m.id) ? { ...m, role: newRole } : m));
+    toast.success(`${selectedIds.size} members updated to ${newRole}`);
+    setSelectedIds(new Set());
+    setProcessing(null);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -134,11 +204,55 @@ const MemberManager = () => {
         </div>
       </div>
 
+      {/* Bulk Actions Bar */}
+      {selectedIds.size > 0 && (
+        <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4 flex flex-wrap items-center gap-3">
+          <span className="text-sm font-bold text-primary">{selectedIds.size} selected</span>
+          <div className="h-4 w-px bg-white/10" />
+          <div className="flex items-center gap-2">
+            <Input 
+              type="number" 
+              value={bulkPointsAmount} 
+              onChange={e => setBulkPointsAmount(parseInt(e.target.value) || 0)}
+              className="w-20 h-8 text-xs bg-black/20 border-white/10 rounded-lg"
+            />
+            <Button size="sm" onClick={bulkAwardPoints} disabled={processing === "bulk"} className="h-8 rounded-lg text-xs gap-1">
+              <Trophy size={12} /> Award Points
+            </Button>
+          </div>
+          <Button size="sm" variant="outline" onClick={bulkEmail} className="h-8 rounded-lg text-xs gap-1">
+            <Mail size={12} /> Group Email
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size="sm" variant="outline" className="h-8 rounded-lg text-xs gap-1">
+                <Shield size={12} /> Change Role
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={() => bulkChangeRole("member")}>Set to Member</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => bulkChangeRole("admin")}>Set to Admin</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <Button size="sm" variant="ghost" onClick={() => setSelectedIds(new Set())} className="h-8 rounded-lg text-xs text-muted-foreground ml-auto">
+            Clear
+          </Button>
+        </div>
+      )}
+
       <div className="bg-card/30 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
               <tr className="bg-white/5 border-b border-white/5">
+                <th className="p-4 w-10">
+                  <input 
+                    type="checkbox" 
+                    checked={selectedIds.size === filtered.length && filtered.length > 0}
+                    onChange={toggleSelectAll}
+                    className="rounded border-white/20 bg-transparent accent-primary"
+                  />
+                </th>
                 <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Member</th>
                 <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Programme</th>
                 <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Role</th>
@@ -148,12 +262,20 @@ const MemberManager = () => {
             </thead>
             <tbody className="divide-y divide-white/5">
               {loading ? (
-                <tr><td colSpan={5} className="p-20 text-center"><Loader2 className="animate-spin inline text-primary" /></td></tr>
+                <tr><td colSpan={6} className="p-20 text-center"><Loader2 className="animate-spin inline text-primary" /></td></tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan={5} className="p-20 text-center text-muted-foreground text-sm">No members matching your search.</td></tr>
+                <tr><td colSpan={6} className="p-20 text-center text-muted-foreground text-sm">No members matching your search.</td></tr>
               ) : (
                 filtered.map(member => (
-                  <tr key={member.id} className="hover:bg-white/5 transition-colors group">
+                  <tr key={member.id} className={`hover:bg-white/5 transition-colors group ${selectedIds.has(member.id) ? 'bg-primary/5' : ''}`}>
+                    <td className="p-4 w-10">
+                      <input 
+                        type="checkbox" 
+                        checked={selectedIds.has(member.id)}
+                        onChange={() => toggleSelect(member.id)}
+                        className="rounded border-white/20 bg-transparent accent-primary"
+                      />
+                    </td>
                     <td className="p-4">
                       <div className="flex items-center gap-3">
                         <Avatar className="h-9 w-9 border border-white/10">

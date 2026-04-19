@@ -4,6 +4,7 @@ import { Search, Github, ExternalLink, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
+import { ensureUrl } from "@/lib/utils-url";
 
 interface Project {
   id: string;
@@ -97,8 +98,8 @@ const Projects = () => {
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-[11px] font-medium uppercase tracking-wider text-primary">{p.category}</span>
                     <div className="flex gap-2">
-                      <a href={p.github_url} className="text-muted-foreground hover:text-foreground transition-colors"><Github className="w-3.5 h-3.5" /></a>
-                      <a href={p.live_url} className="text-muted-foreground hover:text-foreground transition-colors"><ExternalLink className="w-3.5 h-3.5" /></a>
+                      <a href={ensureUrl(p.github_url)} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors"><Github className="w-3.5 h-3.5" /></a>
+                      <a href={ensureUrl(p.live_url)} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors"><ExternalLink className="w-3.5 h-3.5" /></a>
                     </div>
                   </div>
                   <h3 className="font-semibold text-[15px] mb-1.5">{p.title}</h3>

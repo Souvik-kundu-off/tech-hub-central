@@ -8,7 +8,10 @@ interface BlogPost {
   id: string;
   title: string;
   excerpt: string;
+  content: string;
   category: string;
+  author_name: string;
+  is_published: boolean;
   published_at: string;
 }
 
@@ -19,6 +22,7 @@ const Blog = () => {
       const { data, error } = await supabase
         .from("blog_posts")
         .select("*")
+        .eq("is_published", true)
         .order("published_at", { ascending: false });
       
       if (error) throw error;
@@ -57,9 +61,21 @@ const Blog = () => {
                       <Calendar className="w-3 h-3" /> 
                       {format(new Date(post.published_at), "MMM dd, yyyy")}
                     </span>
+                    {post.author_name && (
+                      <>
+                        <span className="text-[11px] text-muted-foreground">•</span>
+                        <span className="text-[11px] text-muted-foreground">{post.author_name}</span>
+                      </>
+                    )}
                   </div>
                   <h2 className="font-semibold text-lg mb-1.5 group-hover:text-primary transition-colors cursor-pointer">{post.title}</h2>
                   <p className="text-sm text-muted-foreground leading-relaxed">{post.excerpt}</p>
+                  {post.content && (
+                    <details className="mt-3">
+                      <summary className="text-xs text-primary cursor-pointer hover:underline font-medium">Read more</summary>
+                      <div className="mt-3 text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{post.content}</div>
+                    </details>
+                  )}
                 </article>
               ))}
             </div>

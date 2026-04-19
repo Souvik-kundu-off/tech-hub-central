@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, LogOut, User, ShieldCheck, BarChart3, Layout, Calendar, Megaphone, Users, BookOpen, Settings } from "lucide-react";
+import {
+  Menu, X, LogOut, User, ShieldCheck, BarChart3, Layout, Calendar,
+  Megaphone, Users, BookOpen, Settings, ScrollText, Image,
+  FileText, Crown, FileSpreadsheet, Home, ChevronDown
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -19,20 +23,33 @@ const AdminNavbar = () => {
   const { profile, session, signOut } = useAuth();
   const location = useLocation();
 
-  const navLinks = [
+  const primaryLinks = [
     { label: "Overview", href: "/admin", icon: BarChart3, exact: true },
     { label: "Moderation", href: "/admin/moderation", icon: Layout },
     { label: "Events", href: "/admin/events", icon: Calendar },
     { label: "Broadcasts", href: "/admin/broadcasts", icon: Megaphone },
     { label: "Directory", href: "/admin/directory", icon: Users },
+  ];
+
+  const moreLinks = [
+    { label: "Blog", href: "/admin/blog", icon: FileText },
+    { label: "Gallery", href: "/admin/gallery", icon: Image },
+    { label: "Team", href: "/admin/team", icon: Crown },
     { label: "Resources", href: "/admin/resources", icon: BookOpen },
+    { label: "Homepage", href: "/admin/homepage", icon: Home },
+    { label: "Reports", href: "/admin/reports", icon: FileSpreadsheet },
+    { label: "Audit Log", href: "/admin/audit-log", icon: ScrollText },
     { label: "Settings", href: "/admin/settings", icon: Settings },
   ];
 
-  const isActive = (link: typeof navLinks[0]) => {
+  const allLinks = [...primaryLinks, ...moreLinks];
+
+  const isActive = (link: { href: string; exact?: boolean }) => {
     if (link.exact) return location.pathname === link.href;
     return location.pathname.startsWith(link.href);
   };
+
+  const isMoreActive = moreLinks.some(l => isActive(l));
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/60 backdrop-blur-xl border-b border-white/5">
@@ -46,7 +63,7 @@ const AdminNavbar = () => {
           </Link>
 
           <div className="hidden lg:flex items-center gap-0.5 mx-4">
-            {navLinks.map((link) => {
+            {primaryLinks.map((link) => {
               const Icon = link.icon;
               const active = isActive(link);
               return (
@@ -65,6 +82,33 @@ const AdminNavbar = () => {
                 </Link>
               );
             })}
+
+            {/* More dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className={`relative flex items-center gap-1 px-3 py-1.5 text-[12px] font-semibold uppercase tracking-wider transition-colors ${
+                  isMoreActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                }`}>
+                  More <ChevronDown size={12} />
+                  {isMoreActive && (
+                    <motion.div layoutId="admin-nav-underline" className="absolute bottom-0 left-2 right-2 h-0.5 bg-primary rounded-full" />
+                  )}
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="center" className="w-52">
+                <DropdownMenuLabel className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Content & Tools</DropdownMenuLabel>
+                {moreLinks.map((link) => {
+                  const Icon = link.icon;
+                  return (
+                    <DropdownMenuItem key={link.label} asChild className={`cursor-pointer gap-2 ${isActive(link) ? "text-primary" : ""}`}>
+                      <Link to={link.href}>
+                        <Icon size={14} /> {link.label}
+                      </Link>
+                    </DropdownMenuItem>
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           <div className="hidden lg:flex items-center gap-4 shrink-0">
@@ -105,14 +149,14 @@ const AdminNavbar = () => {
 
         <AnimatePresence>
           {isOpen && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               className="lg:hidden py-4 border-t border-border"
             >
               <div className="grid grid-cols-2 gap-1 mb-4">
-                {navLinks.map((link) => {
+                {allLinks.map((link) => {
                   const Icon = link.icon;
                   const active = isActive(link);
                   return (
