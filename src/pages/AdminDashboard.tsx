@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
 import PageLayout from "@/components/PageLayout";
 import { 
   ShieldCheck, 
@@ -9,7 +8,9 @@ import {
   Settings,
   Loader2,
   AlertCircle,
-  BookOpen
+  BookOpen,
+  BarChart3,
+  Calendar
 } from "lucide-react";
 
 import { useSearchParams } from "react-router-dom";
@@ -19,6 +20,8 @@ import BroadcastManager from "@/components/admin/BroadcastManager";
 import MemberManager from "@/components/admin/MemberManager";
 import MaintenancePanel from "@/components/admin/MaintenancePanel";
 import ResourceManager from "@/components/admin/ResourceManager";
+import EventManager from "@/components/admin/EventManager";
+import AnalyticsPanel from "@/components/admin/AnalyticsPanel";
 import { motion } from "framer-motion";
 
 
@@ -30,7 +33,7 @@ const AdminDashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [timedOut, setTimedOut] = useState(false);
   
-  const activeTab = searchParams.get("tab") || "projects";
+  const activeTab = searchParams.get("tab") || "overview";
 
   useEffect(() => {
     if (authLoading) {
@@ -94,44 +97,37 @@ const AdminDashboard = () => {
         >
           <div className="sticky top-20 z-30 bg-background/80 backdrop-blur-md pb-4 pt-2 -mx-4 px-4 border-b border-white/5">
             <TabsList className="bg-white/5 border border-white/10 p-1.5 h-14 rounded-2xl overflow-x-auto justify-start md:justify-center">
-              <TabsTrigger value="projects" className="rounded-xl px-4 md:px-6 gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-bold text-xs uppercase tracking-wider transition-all">
+              <TabsTrigger value="overview" className="rounded-xl px-4 md:px-5 gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-bold text-xs uppercase tracking-wider transition-all">
+                <BarChart3 size={16} /> Overview
+              </TabsTrigger>
+              <TabsTrigger value="projects" className="rounded-xl px-4 md:px-5 gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-bold text-xs uppercase tracking-wider transition-all">
                 <Layout size={16} /> Moderation
               </TabsTrigger>
-              <TabsTrigger value="broadcasts" className="rounded-xl px-4 md:px-6 gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-bold text-xs uppercase tracking-wider transition-all">
+              <TabsTrigger value="events" className="rounded-xl px-4 md:px-5 gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-bold text-xs uppercase tracking-wider transition-all">
+                <Calendar size={16} /> Events
+              </TabsTrigger>
+              <TabsTrigger value="broadcasts" className="rounded-xl px-4 md:px-5 gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-bold text-xs uppercase tracking-wider transition-all">
                 <Megaphone size={16} /> Broadcasts
               </TabsTrigger>
-              <TabsTrigger value="members" className="rounded-xl px-4 md:px-6 gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-bold text-xs uppercase tracking-wider transition-all">
+              <TabsTrigger value="members" className="rounded-xl px-4 md:px-5 gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-bold text-xs uppercase tracking-wider transition-all">
                 <Users size={16} /> Directory
               </TabsTrigger>
-              <TabsTrigger value="resources" className="rounded-xl px-4 md:px-6 gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-bold text-xs uppercase tracking-wider transition-all">
+              <TabsTrigger value="resources" className="rounded-xl px-4 md:px-5 gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-bold text-xs uppercase tracking-wider transition-all">
                 <BookOpen size={16} /> Resources
               </TabsTrigger>
-              <TabsTrigger value="maintenance" className="rounded-xl px-4 md:px-6 gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-bold text-xs uppercase tracking-wider transition-all">
-                <Settings size={16} /> Maintenance
+              <TabsTrigger value="maintenance" className="rounded-xl px-4 md:px-5 gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-bold text-xs uppercase tracking-wider transition-all">
+                <Settings size={16} /> Settings
               </TabsTrigger>
-
             </TabsList>
           </div>
 
-          <TabsContent value="projects" className="mt-0 outline-none">
-            <ProjectModeration />
-          </TabsContent>
-          
-          <TabsContent value="broadcasts" className="mt-0 outline-none">
-            <BroadcastManager />
-          </TabsContent>
-          
-          <TabsContent value="members" className="mt-0 outline-none">
-            <MemberManager />
-          </TabsContent>
-
-          <TabsContent value="resources" className="mt-0 outline-none">
-            <ResourceManager />
-          </TabsContent>
-
-          <TabsContent value="maintenance" className="mt-0 outline-none">
-            <MaintenancePanel />
-          </TabsContent>
+          <TabsContent value="overview" className="mt-0 outline-none"><AnalyticsPanel /></TabsContent>
+          <TabsContent value="projects" className="mt-0 outline-none"><ProjectModeration /></TabsContent>
+          <TabsContent value="events" className="mt-0 outline-none"><EventManager /></TabsContent>
+          <TabsContent value="broadcasts" className="mt-0 outline-none"><BroadcastManager /></TabsContent>
+          <TabsContent value="members" className="mt-0 outline-none"><MemberManager /></TabsContent>
+          <TabsContent value="resources" className="mt-0 outline-none"><ResourceManager /></TabsContent>
+          <TabsContent value="maintenance" className="mt-0 outline-none"><MaintenancePanel /></TabsContent>
 
         </Tabs>
       </div>

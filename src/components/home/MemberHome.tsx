@@ -306,9 +306,11 @@ const MemberHome = () => {
               )}
             </div>
 
-            <Button className="mt-auto w-full bg-foreground text-background font-bold h-11 rounded-2xl hover:bg-foreground/90 transition-all">
-              Submit New Project
-            </Button>
+            <Link to="/submit-project" className="mt-auto">
+              <Button className="w-full bg-foreground text-background font-bold h-11 rounded-2xl hover:bg-foreground/90 transition-all">
+                Submit New Project
+              </Button>
+            </Link>
           </motion.div>
 
           {/* Quick Hub - Automated Spotlight */}
