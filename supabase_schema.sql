@@ -260,3 +260,103 @@ BEGIN
         );
     END IF;
 END $$;
+
+-- ============================================================
+-- 7. PROJECT EXTENSIONS (images, tags, team, draft state)
+-- ============================================================
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS images TEXT[] DEFAULT '{}';
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS tags TEXT[] DEFAULT '{}';
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS team_members TEXT[] DEFAULT '{}';
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS featured BOOLEAN DEFAULT FALSE;
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS views_count INTEGER DEFAULT 0;
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS likes_count INTEGER DEFAULT 0;
+-- Status now allows: draft, pending, approved, rejected, changes_requested, paused
+
+-- Allow authors to update/delete own projects
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Authors can update own projects.') THEN
+        CREATE POLICY "Authors can update own projects." ON projects FOR UPDATE USING (auth.uid() = author_id);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Authors can delete own projects.') THEN
+        CREATE POLICY "Authors can delete own projects." ON projects FOR DELETE USING (auth.uid() = author_id);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Admins can delete all projects.') THEN
+        CREATE POLICY "Admins can delete all projects." ON projects FOR DELETE USING (
+            EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
+        );
+    END IF;
+END $$;
+
+-- ============================================================
+-- 8. EVENT REGISTRATIONS
+-- ============================================================
+CREATE TABLE IF NOT EXISTS event_registrations (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  event_id UUID REFERENCES events(id) ON DELETE CASCADE NOT NULL,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+  UNIQUE (event_id, user_id)
+);
+
+ALTER TABLE event_registrations ENABLE ROW LEVEL SECURITY;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users view own registrations.') THEN
+        CREATE POLICY "Users view own registrations." ON event_registrations FOR SELECT USING (auth.uid() = user_id);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users register self.') THEN
+        CREATE POLICY "Users register self." ON event_registrations FOR INSERT WITH CHECK (auth.uid() = user_id);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users unregister self.') THEN
+        CREATE POLICY "Users unregister self." ON event_registrations FOR DELETE USING (auth.uid() = user_id);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Admins manage registrations.') THEN
+        CREATE POLICY "Admins manage registrations." ON event_registrations FOR ALL USING (
+            EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
+        );
+    END IF;
+END $$;
+
+-- ============================================================
+-- 9. EVENT MANAGEMENT (admin)
+-- ============================================================
+ALTER TABLE events ADD COLUMN IF NOT EXISTS banner_url TEXT;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS register_url TEXT;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Events viewable by everyone.') THEN
+        CREATE POLICY "Events viewable by everyone." ON events FOR SELECT USING (true);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Admins manage events.') THEN
+        CREATE POLICY "Admins manage events." ON events FOR ALL USING (
+            EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
+        );
+    END IF;
+END $$;
+
+-- ============================================================
+-- 10. PROJECT IMAGES STORAGE BUCKET
+-- ============================================================
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('project-images', 'project-images', true)
+ON CONFLICT (id) DO NOTHING;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Project images public read' AND tablename = 'objects') THEN
+        CREATE POLICY "Project images public read" ON storage.objects FOR SELECT USING (bucket_id = 'project-images');
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Authenticated users upload project images' AND tablename = 'objects') THEN
+        CREATE POLICY "Authenticated users upload project images" ON storage.objects FOR INSERT WITH CHECK (
+            bucket_id = 'project-images' AND auth.role() = 'authenticated'
+        );
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users delete own project images' AND tablename = 'objects') THEN
+        CREATE POLICY "Users delete own project images" ON storage.objects FOR DELETE USING (
+            bucket_id = 'project-images' AND (auth.uid())::text = (storage.foldername(name))[1]
+        );
+    END IF;
+END $$;
