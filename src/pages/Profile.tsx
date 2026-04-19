@@ -56,8 +56,8 @@ const Profile = () => {
       if (!authProfile) {
         navigate("/login");
       } else {
-        setProfile(authProfile as ProfileData);
-        setFormData(authProfile as ProfileData);
+        setProfile(authProfile as unknown as ProfileData);
+        setFormData(authProfile as unknown as ProfileData);
         setLoading(false);
       }
     }

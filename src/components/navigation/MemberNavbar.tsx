@@ -23,9 +23,8 @@ const MemberNavbar = () => {
     { label: "Dashboard", href: "/dashboard" },
     { label: "Events", href: "/events" },
     { label: "Projects", href: "/projects" },
+    { label: "My Projects", href: "/my-projects" },
     { label: "Resources", href: "/resources" },
-    { label: "Blogs", href: "/blog" },
-    { label: "Gallery", href: "/gallery" },
     { label: "Leaderboard", href: "/leaderboard" },
     { label: "Team", href: "/team" },
   ];
@@ -80,6 +79,9 @@ const MemberNavbar = () => {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild className="cursor-pointer gap-2">
                   <Link to="/profile"><User size={16} /> Profile</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild className="cursor-pointer gap-2">
+                  <Link to="/my-projects"><ShieldCheck size={16} /> My Projects</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={signOut} className="cursor-pointer gap-2 text-destructive focus:text-destructive">
