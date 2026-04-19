@@ -20,6 +20,13 @@ import Profile from "./pages/Profile";
 import MyProjects from "./pages/MyProjects";
 import SubmitProject from "./pages/SubmitProject";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminOverview from "./pages/admin/AdminOverview";
+import AdminModeration from "./pages/admin/AdminModeration";
+import AdminEvents from "./pages/admin/AdminEvents";
+import AdminBroadcasts from "./pages/admin/AdminBroadcasts";
+import AdminDirectory from "./pages/admin/AdminDirectory";
+import AdminResources from "./pages/admin/AdminResources";
+import AdminSettings from "./pages/admin/AdminSettings";
 import AdminReview from "./pages/AdminReview";
 import OnboardingCheck from "./components/auth/OnboardingCheck";
 import NotFound from "./pages/NotFound";
@@ -58,7 +65,13 @@ const App = () => (
             <Route path="/my-projects" element={<MyProjects />} />
             <Route path="/submit-project" element={<SubmitProject />} />
             <Route path="/submit-project/:id" element={<SubmitProject />} />
-            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin" element={<AdminOverview />} />
+            <Route path="/admin/moderation" element={<AdminModeration />} />
+            <Route path="/admin/events" element={<AdminEvents />} />
+            <Route path="/admin/broadcasts" element={<AdminBroadcasts />} />
+            <Route path="/admin/directory" element={<AdminDirectory />} />
+            <Route path="/admin/resources" element={<AdminResources />} />
+            <Route path="/admin/settings" element={<AdminSettings />} />
             <Route path="/admin-review" element={<AdminReview />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
