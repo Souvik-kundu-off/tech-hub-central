@@ -1,4 +1,4 @@
-name = "tech-hub-central"
+name = "Workers Builds - 2026-04-20 05:29"
 pages_build_output_dir = "dist"
 
 compatibility_flags = ["nodejs_compat"]
