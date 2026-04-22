@@ -1,43 +1,44 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Terminal, LogOut, User, ShieldCheck, Shield } from "lucide-react";
+import { Menu, X, ShieldCheck, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
+import { ROLE_LABELS, AppRole } from "@/lib/permissions";
 
-const MemberNavbar = () => {
+const StaffNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { profile, session, signOut } = useAuth();
+  const { profile, session, signOut, role } = useAuth();
   const location = useLocation();
 
   const navLinks = [
-    { label: "Dashboard", href: "/dashboard" },
+    { label: "Dashboard", href: "/admin" },
     { label: "Projects", href: "/projects" },
     { label: "Events", href: "/events" },
     { label: "Blogs", href: "/blog" },
     { label: "Broadcasts", href: "/broadcasts" },
-    { label: "Resources", href: "/resources" },
-    { label: "Leaderboard", href: "/leaderboard" },
+    { label: "Team", href: "/team" },
   ];
+
+  const roleLabel = role ? ROLE_LABELS[role as AppRole] ?? role : "Staff";
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/60 backdrop-blur-xl border-b border-white/5">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <Link to="/dashboard" className="flex items-center gap-3 group">
+          <Link to="/admin" className="flex items-center gap-3 group">
             <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center transition-transform group-hover:scale-110">
-              <Terminal className="w-4.5 h-4.5 text-primary" />
+              <ShieldCheck className="w-4.5 h-4.5 text-primary" />
             </div>
             <span className="font-bold text-lg tracking-tight">TechClub</span>
+            <span className="hidden md:inline-flex items-center px-2 py-0.5 rounded-md bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider">
+              {roleLabel}
+            </span>
           </Link>
 
           <div className="hidden lg:flex items-center gap-1">
@@ -46,7 +47,9 @@ const MemberNavbar = () => {
                 key={link.label}
                 to={link.href}
                 className={`relative px-3 py-1.5 text-[13px] font-medium transition-colors ${
-                  location.pathname === link.href ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                  location.pathname === link.href
+                    ? "text-primary"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {link.label}
@@ -60,8 +63,8 @@ const MemberNavbar = () => {
           <div className="hidden lg:flex items-center gap-4">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-9 w-9 rounded-full ring-offset-background transition-all hover:ring-2 hover:ring-primary/20">
-                  <Avatar className="h-9 w-9 border border-border">
+                <Button variant="ghost" className="relative h-9 w-9 rounded-full hover:ring-2 hover:ring-primary/20">
+                  <Avatar className="h-9 w-9 border border-primary/20">
                     <AvatarImage src={profile?.avatar_url} />
                     <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-bold">
                       {profile?.full_name?.split(" ").map(n => n[0]).join("").toUpperCase() || <User size={14}/>}
@@ -74,14 +77,15 @@ const MemberNavbar = () => {
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-semibold leading-none">{profile?.full_name}</p>
                     <p className="text-xs leading-none text-muted-foreground">{session?.user?.email}</p>
+                    <p className="text-[10px] leading-none text-primary font-bold uppercase tracking-wider mt-1">{roleLabel}</p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild className="cursor-pointer gap-2">
-                  <Link to="/profile"><User size={16} /> Profile</Link>
+                <DropdownMenuItem asChild className="cursor-pointer gap-2 text-primary">
+                  <Link to="/admin"><ShieldCheck size={16} /> Dashboard</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild className="cursor-pointer gap-2">
-                  <Link to="/my-projects"><ShieldCheck size={16} /> My Projects</Link>
+                  <Link to="/profile"><User size={16} /> Profile</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={signOut} className="cursor-pointer gap-2 text-destructive focus:text-destructive">
@@ -98,7 +102,7 @@ const MemberNavbar = () => {
 
         <AnimatePresence>
           {isOpen && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
@@ -111,7 +115,9 @@ const MemberNavbar = () => {
                     to={link.href}
                     onClick={() => setIsOpen(false)}
                     className={`px-3 py-2 text-[13px] font-medium rounded-lg transition-colors ${
-                      location.pathname === link.href ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-accent"
+                      location.pathname === link.href
+                        ? "bg-primary/10 text-primary"
+                        : "text-muted-foreground hover:bg-accent"
                     }`}
                   >
                     {link.label}
@@ -136,4 +142,4 @@ const MemberNavbar = () => {
   );
 };
 
-export default MemberNavbar;
+export default StaffNavbar;

@@ -360,3 +360,198 @@ BEGIN
         );
     END IF;
 END $$;
+
+-- =============================================================
+-- 11. ROLES SYSTEM (app_role enum, user_roles, has_role, sync)
+-- =============================================================
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_role') THEN
+    CREATE TYPE public.app_role AS ENUM (
+      'superadmin','admin','faculty','event_manager','content_editor','moderator','member'
+    );
+  END IF;
+END $$;
+
+-- Ensure all enum values exist (idempotent re-runs)
+DO $$
+BEGIN
+  BEGIN ALTER TYPE public.app_role ADD VALUE IF NOT EXISTS 'superadmin'; EXCEPTION WHEN duplicate_object THEN NULL; END;
+  BEGIN ALTER TYPE public.app_role ADD VALUE IF NOT EXISTS 'faculty'; EXCEPTION WHEN duplicate_object THEN NULL; END;
+  BEGIN ALTER TYPE public.app_role ADD VALUE IF NOT EXISTS 'event_manager'; EXCEPTION WHEN duplicate_object THEN NULL; END;
+  BEGIN ALTER TYPE public.app_role ADD VALUE IF NOT EXISTS 'content_editor'; EXCEPTION WHEN duplicate_object THEN NULL; END;
+  BEGIN ALTER TYPE public.app_role ADD VALUE IF NOT EXISTS 'moderator'; EXCEPTION WHEN duplicate_object THEN NULL; END;
+END $$;
+
+CREATE TABLE IF NOT EXISTS public.user_roles (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  role public.app_role NOT NULL,
+  granted_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (user_id, role)
+);
+
+ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
+
+CREATE OR REPLACE FUNCTION public.has_role(_user_id UUID, _role public.app_role)
+RETURNS BOOLEAN LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
+  SELECT EXISTS (SELECT 1 FROM public.user_roles WHERE user_id = _user_id AND role = _role);
+$$;
+
+CREATE OR REPLACE FUNCTION public.has_any_role(_user_id UUID, _roles public.app_role[])
+RETURNS BOOLEAN LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
+  SELECT EXISTS (SELECT 1 FROM public.user_roles WHERE user_id = _user_id AND role = ANY(_roles));
+$$;
+
+CREATE OR REPLACE FUNCTION public.is_staff(_user_id UUID)
+RETURNS BOOLEAN LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
+  SELECT public.has_any_role(_user_id, ARRAY[
+    'superadmin','admin','faculty','event_manager','content_editor','moderator'
+  ]::public.app_role[]);
+$$;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users see own roles') THEN
+    CREATE POLICY "Users see own roles" ON public.user_roles FOR SELECT USING (auth.uid() = user_id);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Staff can read all roles') THEN
+    CREATE POLICY "Staff can read all roles" ON public.user_roles FOR SELECT USING (public.is_staff(auth.uid()));
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Superadmins manage roles') THEN
+    CREATE POLICY "Superadmins manage roles" ON public.user_roles FOR ALL
+      USING (public.has_any_role(auth.uid(), ARRAY['superadmin','admin']::public.app_role[]))
+      WITH CHECK (public.has_any_role(auth.uid(), ARRAY['superadmin','admin']::public.app_role[]));
+  END IF;
+END $$;
+
+-- Backfill from profiles.role
+INSERT INTO public.user_roles (user_id, role)
+SELECT p.id,
+  CASE
+    WHEN p.role IN ('superadmin','admin','faculty','event_manager','content_editor','moderator')
+      THEN p.role::public.app_role
+    ELSE 'member'::public.app_role
+  END
+FROM public.profiles p
+ON CONFLICT (user_id, role) DO NOTHING;
+
+-- Keep profiles.role in sync (denormalized cache of highest role)
+CREATE OR REPLACE FUNCTION public.sync_profile_primary_role(_user_id UUID)
+RETURNS VOID LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE primary_role TEXT;
+BEGIN
+  SELECT role::text INTO primary_role
+  FROM public.user_roles
+  WHERE user_id = _user_id
+  ORDER BY CASE role
+    WHEN 'superadmin' THEN 1 WHEN 'admin' THEN 2 WHEN 'faculty' THEN 3
+    WHEN 'event_manager' THEN 4 WHEN 'content_editor' THEN 5
+    WHEN 'moderator' THEN 6 WHEN 'member' THEN 7
+  END LIMIT 1;
+  UPDATE public.profiles SET role = COALESCE(primary_role, 'member') WHERE id = _user_id;
+END $$;
+
+CREATE OR REPLACE FUNCTION public.user_roles_sync_trigger()
+RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+BEGIN
+  IF TG_OP = 'DELETE' THEN
+    PERFORM public.sync_profile_primary_role(OLD.user_id); RETURN OLD;
+  ELSE
+    PERFORM public.sync_profile_primary_role(NEW.user_id); RETURN NEW;
+  END IF;
+END $$;
+
+DROP TRIGGER IF EXISTS user_roles_sync ON public.user_roles;
+CREATE TRIGGER user_roles_sync
+  AFTER INSERT OR UPDATE OR DELETE ON public.user_roles
+  FOR EACH ROW EXECUTE PROCEDURE public.user_roles_sync_trigger();
+
+-- Auto-assign 'member' role on new auth user
+CREATE OR REPLACE FUNCTION public.assign_default_role()
+RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+BEGIN
+  INSERT INTO public.user_roles (user_id, role)
+  VALUES (NEW.id, 'member'::public.app_role)
+  ON CONFLICT (user_id, role) DO NOTHING;
+  RETURN NEW;
+END $$;
+
+DROP TRIGGER IF EXISTS on_auth_user_created_assign_role ON auth.users;
+CREATE TRIGGER on_auth_user_created_assign_role
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE PROCEDURE public.assign_default_role();
+
+-- Resync existing profiles
+DO $$
+DECLARE r RECORD;
+BEGIN
+  FOR r IN SELECT DISTINCT user_id FROM public.user_roles LOOP
+    PERFORM public.sync_profile_primary_role(r.user_id);
+  END LOOP;
+END $$;
+
+-- =============================================================
+-- 12. EVENTS v2: inside/outside types + dynamic form schema
+-- =============================================================
+ALTER TABLE public.events ADD COLUMN IF NOT EXISTS event_type TEXT DEFAULT 'outside';
+ALTER TABLE public.events ADD COLUMN IF NOT EXISTS external_url TEXT;
+ALTER TABLE public.events ADD COLUMN IF NOT EXISTS form_schema JSONB DEFAULT '[]'::jsonb;
+UPDATE public.events SET event_type = COALESCE(event_type, 'outside') WHERE event_type IS NULL;
+
+ALTER TABLE public.event_registrations ADD COLUMN IF NOT EXISTS answers JSONB DEFAULT '{}'::jsonb;
+
+-- =============================================================
+-- 13. ROLE-AWARE RLS (replace old admin-only policies)
+-- =============================================================
+DROP POLICY IF EXISTS "Admins can update all profiles." ON public.profiles;
+DROP POLICY IF EXISTS "Staff manage profiles" ON public.profiles;
+CREATE POLICY "Staff manage profiles" ON public.profiles FOR UPDATE
+  USING (public.has_any_role(auth.uid(), ARRAY['superadmin','admin']::public.app_role[]));
+
+DROP POLICY IF EXISTS "Admins can update all projects." ON public.projects;
+DROP POLICY IF EXISTS "Mods update projects" ON public.projects;
+CREATE POLICY "Mods update projects" ON public.projects FOR UPDATE
+  USING (public.has_any_role(auth.uid(), ARRAY['superadmin','admin','moderator']::public.app_role[]));
+
+DROP POLICY IF EXISTS "Admins can delete all projects." ON public.projects;
+DROP POLICY IF EXISTS "Mods delete projects" ON public.projects;
+CREATE POLICY "Mods delete projects" ON public.projects FOR DELETE
+  USING (public.has_any_role(auth.uid(), ARRAY['superadmin','admin','moderator']::public.app_role[]));
+
+DROP POLICY IF EXISTS "Admins can manage announcements." ON public.announcements;
+DROP POLICY IF EXISTS "Editors manage announcements" ON public.announcements;
+CREATE POLICY "Editors manage announcements" ON public.announcements FOR ALL
+  USING (public.has_any_role(auth.uid(), ARRAY['superadmin','admin','content_editor','event_manager']::public.app_role[]))
+  WITH CHECK (public.has_any_role(auth.uid(), ARRAY['superadmin','admin','content_editor','event_manager']::public.app_role[]));
+
+DROP POLICY IF EXISTS "Admins can manage resources." ON public.resources;
+DROP POLICY IF EXISTS "Editors manage resources" ON public.resources;
+CREATE POLICY "Editors manage resources" ON public.resources FOR ALL
+  USING (public.has_any_role(auth.uid(), ARRAY['superadmin','admin','content_editor']::public.app_role[]))
+  WITH CHECK (public.has_any_role(auth.uid(), ARRAY['superadmin','admin','content_editor']::public.app_role[]));
+
+DROP POLICY IF EXISTS "Admins manage events." ON public.events;
+DROP POLICY IF EXISTS "Event managers manage events" ON public.events;
+CREATE POLICY "Event managers manage events" ON public.events FOR ALL
+  USING (public.has_any_role(auth.uid(), ARRAY['superadmin','admin','event_manager']::public.app_role[]))
+  WITH CHECK (public.has_any_role(auth.uid(), ARRAY['superadmin','admin','event_manager']::public.app_role[]));
+
+DROP POLICY IF EXISTS "Admins manage registrations." ON public.event_registrations;
+DROP POLICY IF EXISTS "Event staff view registrations" ON public.event_registrations;
+DROP POLICY IF EXISTS "Event staff manage registrations" ON public.event_registrations;
+CREATE POLICY "Event staff view registrations" ON public.event_registrations FOR SELECT
+  USING (public.has_any_role(auth.uid(), ARRAY['superadmin','admin','event_manager','faculty']::public.app_role[]));
+CREATE POLICY "Event staff manage registrations" ON public.event_registrations FOR ALL
+  USING (public.has_any_role(auth.uid(), ARRAY['superadmin','admin','event_manager']::public.app_role[]))
+  WITH CHECK (public.has_any_role(auth.uid(), ARRAY['superadmin','admin','event_manager']::public.app_role[]));
+
+DROP POLICY IF EXISTS "Admins can manage points history." ON public.points_history;
+DROP POLICY IF EXISTS "Admins manage points" ON public.points_history;
+DROP POLICY IF EXISTS "Faculty read points" ON public.points_history;
+CREATE POLICY "Admins manage points" ON public.points_history FOR ALL
+  USING (public.has_any_role(auth.uid(), ARRAY['superadmin','admin']::public.app_role[]))
+  WITH CHECK (public.has_any_role(auth.uid(), ARRAY['superadmin','admin']::public.app_role[]));
+CREATE POLICY "Faculty read points" ON public.points_history FOR SELECT
+  USING (public.has_role(auth.uid(), 'faculty'::public.app_role));
