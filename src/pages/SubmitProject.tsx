@@ -15,6 +15,7 @@ import {
   Loader2, Save, Send, Github, Globe, Image as ImageIcon, X, Plus, ArrowLeft,
 } from "lucide-react";
 import { z } from "zod";
+import CloudinaryMultiUpload from "@/components/ui/CloudinaryMultiUpload";
 
 const projectSchema = z.object({
   title: z.string().trim().min(3, "Title must be at least 3 characters").max(100),
@@ -34,7 +35,6 @@ const SubmitProject = () => {
 
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState<"draft" | "submit" | null>(null);
-  const [uploading, setUploading] = useState(false);
 
   const [form, setForm] = useState({
     title: "",
@@ -97,27 +97,7 @@ const SubmitProject = () => {
     setList(list.filter((_, idx) => idx !== i));
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files?.length || !user) return;
-    if (images.length + e.target.files.length > 6) {
-      toast.error("Max 6 images");
-      return;
-    }
-    setUploading(true);
-    const newUrls: string[] = [];
-    for (const file of Array.from(e.target.files)) {
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error(`${file.name} > 5MB`); continue;
-      }
-      const path = `${user.id}/${Date.now()}-${file.name.replace(/\s/g, "_")}`;
-      const { error } = await supabase.storage.from("project-images").upload(path, file);
-      if (error) { toast.error(error.message); continue; }
-      const { data } = supabase.storage.from("project-images").getPublicUrl(path);
-      newUrls.push(data.publicUrl);
-    }
-    setImages([...images, ...newUrls]);
-    setUploading(false);
-  };
+
 
   const save = async (status: "draft" | "pending") => {
     if (!user || !profile) return;
@@ -288,32 +268,14 @@ const SubmitProject = () => {
           />
 
           {/* Images */}
-          <div className="space-y-2">
-            <Label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              Screenshots (max 6, 5MB each)
-            </Label>
-            <div className="grid grid-cols-3 gap-2">
-              {images.map((url, i) => (
-                <div key={i} className="relative group aspect-video rounded-md overflow-hidden border border-border">
-                  <img src={url} alt={`Screenshot ${i + 1}`} className="w-full h-full object-cover" />
-                  <button
-                    type="button"
-                    onClick={() => setImages(images.filter((_, idx) => idx !== i))}
-                    className="absolute top-1 right-1 p-1 rounded bg-background/80 opacity-0 group-hover:opacity-100"
-                  >
-                    <X size={12} />
-                  </button>
-                </div>
-              ))}
-              {images.length < 6 && (
-                <label className="aspect-video rounded-md border border-dashed border-border flex flex-col items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground/30 cursor-pointer text-xs gap-1">
-                  {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageIcon className="w-5 h-5" />}
-                  <span>Upload</span>
-                  <input type="file" accept="image/*" multiple className="hidden" onChange={handleImageUpload} />
-                </label>
-              )}
-            </div>
-          </div>
+          <CloudinaryMultiUpload
+            images={images}
+            onChange={setImages}
+            maxImages={6}
+            maxSizeMB={5}
+            folder="tech-hub/projects"
+            label="Screenshots (max 6, 5MB each)"
+          />
 
           {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-border">

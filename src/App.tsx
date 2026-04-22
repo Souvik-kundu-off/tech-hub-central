@@ -22,6 +22,19 @@ import Profile from "./pages/Profile";
 import MyProjects from "./pages/MyProjects";
 import SubmitProject from "./pages/SubmitProject";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminOverview from "./pages/admin/AdminOverview";
+import AdminModeration from "./pages/admin/AdminModeration";
+import AdminEvents from "./pages/admin/AdminEvents";
+import AdminBroadcasts from "./pages/admin/AdminBroadcasts";
+import AdminDirectory from "./pages/admin/AdminDirectory";
+import AdminResources from "./pages/admin/AdminResources";
+import AdminSettings from "./pages/admin/AdminSettings";
+import AdminAuditLog from "./pages/admin/AdminAuditLog";
+import AdminGallery from "./pages/admin/AdminGallery";
+import AdminBlog from "./pages/admin/AdminBlog";
+import AdminTeam from "./pages/admin/AdminTeam";
+import AdminReports from "./pages/admin/AdminReports";
+import AdminHomepage from "./pages/admin/AdminHomepage";
 import AdminReview from "./pages/AdminReview";
 import OnboardingCheck from "./components/auth/OnboardingCheck";
 import NotFound from "./pages/NotFound";
@@ -70,6 +83,46 @@ const App = () => (
       </TooltipProvider>
     </AuthProvider>
   </QueryClientProvider>
+
+            <Route path="/" element={<Index />} />
+            <Route path="/dashboard" element={<Index />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/events" element={<Events />} />
+            <Route path="/projects" element={<Projects />} />
+            <Route path="/team" element={<Team />} />
+            <Route path="/resources" element={<Resources />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/gallery" element={<Gallery />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/onboarding" element={<Onboarding />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/my-projects" element={<MyProjects />} />
+            <Route path="/submit-project" element={<SubmitProject />} />
+            <Route path="/submit-project/:id" element={<SubmitProject />} />
+            <Route path="/admin" element={<AdminOverview />} />
+            <Route path="/admin/moderation" element={<AdminModeration />} />
+            <Route path="/admin/events" element={<AdminEvents />} />
+            <Route path="/admin/broadcasts" element={<AdminBroadcasts />} />
+            <Route path="/admin/directory" element={<AdminDirectory />} />
+            <Route path="/admin/resources" element={<AdminResources />} />
+            <Route path="/admin/settings" element={<AdminSettings />} />
+            <Route path="/admin/audit-log" element={<AdminAuditLog />} />
+            <Route path="/admin/gallery" element={<AdminGallery />} />
+            <Route path="/admin/blog" element={<AdminBlog />} />
+            <Route path="/admin/team" element={<AdminTeam />} />
+            <Route path="/admin/reports" element={<AdminReports />} />
+            <Route path="/admin/homepage" element={<AdminHomepage />} />
+            <Route path="/admin-review" element={<AdminReview />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </OnboardingCheck>
+      </BrowserRouter>
+    </TooltipProvider>
+  </AuthProvider>
+</QueryClientProvider>
 );
 
 export default App;

@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight, ExternalLink, Github, Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
+import { ensureUrl } from "@/lib/utils-url";
 
 const FeaturedProjects = () => {
   const { data: projects = [], isLoading } = useQuery({
@@ -54,8 +55,8 @@ const FeaturedProjects = () => {
                 <div className="flex items-center justify-between pt-3 border-t border-border">
                   <span className="text-xs text-muted-foreground">Club Member</span>
                   <div className="flex gap-2">
-                    {p.github_url && <a href={p.github_url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors"><Github className="w-3.5 h-3.5" /></a>}
-                    {p.live_url && <a href={p.live_url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors"><ExternalLink className="w-3.5 h-3.5" /></a>}
+                    {p.github_url && <a href={ensureUrl(p.github_url)} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors"><Github className="w-3.5 h-3.5" /></a>}
+                    {p.live_url && <a href={ensureUrl(p.live_url)} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors"><ExternalLink className="w-3.5 h-3.5" /></a>}
                   </div>
                 </div>
               </div>

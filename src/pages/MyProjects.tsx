@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
+import { ensureUrl } from "@/lib/utils-url";
 import { useAuth } from "@/contexts/AuthContext";
 import PageLayout from "@/components/PageLayout";
 import { Button } from "@/components/ui/button";
@@ -187,14 +188,14 @@ const MyProjects = () => {
                         </Button>
                       </Link>
                       {p.live_url && (
-                        <a href={p.live_url} target="_blank" rel="noreferrer" className="flex-1">
+                        <a href={ensureUrl(p.live_url)} target="_blank" rel="noreferrer" className="flex-1">
                           <Button variant="ghost" size="sm" className="w-full gap-1.5 h-8">
                             <ExternalLink size={13} /> Live
                           </Button>
                         </a>
                       )}
                       {p.github_url && (
-                        <a href={p.github_url} target="_blank" rel="noreferrer" className="flex-1">
+                        <a href={ensureUrl(p.github_url)} target="_blank" rel="noreferrer" className="flex-1">
                           <Button variant="ghost" size="sm" className="w-full gap-1.5 h-8">
                             <Github size={13} /> Repo
                           </Button>

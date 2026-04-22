@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Terminal, LogOut, User, ShieldCheck } from "lucide-react";
+import {
+  Menu, X, LogOut, User, ShieldCheck, BarChart3, Layout, Calendar,
+  Megaphone, Users, BookOpen, Settings, ScrollText, Image,
+  FileText, Crown, FileSpreadsheet, Home, ChevronDown
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -19,42 +23,95 @@ const AdminNavbar = () => {
   const { profile, session, signOut } = useAuth();
   const location = useLocation();
 
-  const navLinks = [
-    { label: "Command Center", href: "/admin" },
-    { label: "Gallery", href: "/gallery" },
-    { label: "Blogs", href: "/blog" },
-    { label: "Team", href: "/team" },
+  const primaryLinks = [
+    { label: "Overview", href: "/admin", icon: BarChart3, exact: true },
+    { label: "Moderation", href: "/admin/moderation", icon: Layout },
+    { label: "Events", href: "/admin/events", icon: Calendar },
+    { label: "Broadcasts", href: "/admin/broadcasts", icon: Megaphone },
+    { label: "Directory", href: "/admin/directory", icon: Users },
   ];
+
+  const moreLinks = [
+    { label: "Blog", href: "/admin/blog", icon: FileText },
+    { label: "Gallery", href: "/admin/gallery", icon: Image },
+    { label: "Team", href: "/admin/team", icon: Crown },
+    { label: "Resources", href: "/admin/resources", icon: BookOpen },
+    { label: "Homepage", href: "/admin/homepage", icon: Home },
+    { label: "Reports", href: "/admin/reports", icon: FileSpreadsheet },
+    { label: "Audit Log", href: "/admin/audit-log", icon: ScrollText },
+    { label: "Settings", href: "/admin/settings", icon: Settings },
+  ];
+
+  const allLinks = [...primaryLinks, ...moreLinks];
+
+  const isActive = (link: { href: string; exact?: boolean }) => {
+    if (link.exact) return location.pathname === link.href;
+    return location.pathname.startsWith(link.href);
+  };
+
+  const isMoreActive = moreLinks.some(l => isActive(l));
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/60 backdrop-blur-xl border-b border-white/5">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <Link to="/admin" className="flex items-center gap-3 group">
+          <Link to="/admin" className="flex items-center gap-3 group shrink-0">
             <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center transition-transform group-hover:scale-110">
               <ShieldCheck className="w-4.5 h-4.5 text-primary" />
             </div>
-            <span className="font-bold text-lg tracking-tight">TechClub Admin</span>
+            <span className="font-bold text-lg tracking-tight hidden xl:inline">Admin</span>
           </Link>
 
-          <div className="hidden lg:flex items-center gap-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.label}
-                to={link.href}
-                className={`relative px-3 py-1.5 text-[13px] font-medium transition-colors ${
-                  location.pathname === link.href ? "text-primary" : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {link.label}
-                {location.pathname === link.href && (
-                  <motion.div layoutId="nav-underline" className="absolute bottom-0 left-3 right-3 h-0.5 bg-primary rounded-full" />
-                )}
-              </Link>
-            ))}
+          <div className="hidden lg:flex items-center gap-0.5 mx-4">
+            {primaryLinks.map((link) => {
+              const Icon = link.icon;
+              const active = isActive(link);
+              return (
+                <Link
+                  key={link.label}
+                  to={link.href}
+                  className={`relative flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-semibold uppercase tracking-wider transition-colors ${
+                    active ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Icon size={14} />
+                  {link.label}
+                  {active && (
+                    <motion.div layoutId="admin-nav-underline" className="absolute bottom-0 left-2 right-2 h-0.5 bg-primary rounded-full" />
+                  )}
+                </Link>
+              );
+            })}
+
+            {/* More dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className={`relative flex items-center gap-1 px-3 py-1.5 text-[12px] font-semibold uppercase tracking-wider transition-colors ${
+                  isMoreActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                }`}>
+                  More <ChevronDown size={12} />
+                  {isMoreActive && (
+                    <motion.div layoutId="admin-nav-underline" className="absolute bottom-0 left-2 right-2 h-0.5 bg-primary rounded-full" />
+                  )}
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="center" className="w-52">
+                <DropdownMenuLabel className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Content & Tools</DropdownMenuLabel>
+                {moreLinks.map((link) => {
+                  const Icon = link.icon;
+                  return (
+                    <DropdownMenuItem key={link.label} asChild className={`cursor-pointer gap-2 ${isActive(link) ? "text-primary" : ""}`}>
+                      <Link to={link.href}>
+                        <Icon size={14} /> {link.label}
+                      </Link>
+                    </DropdownMenuItem>
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
-          <div className="hidden lg:flex items-center gap-4">
+          <div className="hidden lg:flex items-center gap-4 shrink-0">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-9 w-9 rounded-full ring-offset-background transition-all hover:ring-2 hover:ring-primary/20">
@@ -74,9 +131,6 @@ const AdminNavbar = () => {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild className="cursor-pointer gap-2 text-primary focus:text-primary">
-                  <Link to="/admin"><ShieldCheck size={16} /> Dashboard</Link>
-                </DropdownMenuItem>
                 <DropdownMenuItem asChild className="cursor-pointer gap-2">
                   <Link to="/profile"><User size={16} /> Profile</Link>
                 </DropdownMenuItem>
@@ -95,32 +149,32 @@ const AdminNavbar = () => {
 
         <AnimatePresence>
           {isOpen && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               className="lg:hidden py-4 border-t border-border"
             >
-              <div className="grid grid-cols-2 gap-1 mb-6">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.label}
-                    to={link.href}
-                    onClick={() => setIsOpen(false)}
-                    className={`px-3 py-2 text-[13px] font-medium rounded-lg transition-colors ${
-                      location.pathname === link.href ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-accent"
-                    }`}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
+              <div className="grid grid-cols-2 gap-1 mb-4">
+                {allLinks.map((link) => {
+                  const Icon = link.icon;
+                  const active = isActive(link);
+                  return (
+                    <Link
+                      key={link.label}
+                      to={link.href}
+                      onClick={() => setIsOpen(false)}
+                      className={`flex items-center gap-2 px-3 py-2.5 text-[13px] font-medium rounded-lg transition-colors ${
+                        active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-accent"
+                      }`}
+                    >
+                      <Icon size={16} />
+                      {link.label}
+                    </Link>
+                  );
+                })}
               </div>
               <div className="pt-4 border-t border-border flex flex-col gap-2">
-                <Link to="/admin" onClick={() => setIsOpen(false)}>
-                  <Button variant="outline" size="sm" className="w-full justify-start gap-2 h-10 px-4 border-primary/20 bg-primary/5 text-primary">
-                    <ShieldCheck size={16} /> Admin Panel
-                  </Button>
-                </Link>
                 <Link to="/profile" onClick={() => setIsOpen(false)}>
                   <Button variant="outline" size="sm" className="w-full justify-start gap-2 h-10 px-4">
                     <User size={16} /> My Profile

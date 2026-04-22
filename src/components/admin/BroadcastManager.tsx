@@ -31,6 +31,7 @@ interface Announcement {
   content: string;
   type: string;
   is_active: boolean;
+  publish_at: string | null;
   expires_at: string | null;
   created_at: string;
 }
@@ -45,7 +46,9 @@ const BroadcastManager = () => {
     title: "",
     content: "",
     type: "info",
-    is_active: true
+    is_active: true,
+    publish_at: "",
+    expires_at: "",
   });
 
   useEffect(() => {
@@ -71,16 +74,26 @@ const BroadcastManager = () => {
     e.preventDefault();
     setProcessing("create");
 
+    const insertData = {
+      title: formData.title,
+      content: formData.content,
+      type: formData.type,
+      is_active: formData.is_active,
+      publish_at: formData.publish_at || null,
+      expires_at: formData.expires_at || null,
+    };
+
     const { error } = await supabase
       .from("announcements")
-      .insert([formData]);
+      .insert([insertData]);
 
     if (error) {
       toast.error("Failed to create broadcast");
     } else {
-      toast.success("Broadcast live!");
+      const isScheduled = formData.publish_at && new Date(formData.publish_at) > new Date();
+      toast.success(isScheduled ? "Broadcast scheduled!" : "Broadcast live!");
       setIsCreating(false);
-      setFormData({ title: "", content: "", type: "info", is_active: true });
+      setFormData({ title: "", content: "", type: "info", is_active: true, publish_at: "", expires_at: "" });
       fetchAnnouncements();
     }
     setProcessing(null);
@@ -195,12 +208,34 @@ const BroadcastManager = () => {
                 className="bg-black/20 border-white/10 rounded-xl min-h-[100px]"
               />
             </div>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">📅 Schedule Publish (Optional)</label>
+                <Input 
+                  type="datetime-local"
+                  value={formData.publish_at}
+                  onChange={e => setFormData({...formData, publish_at: e.target.value})}
+                  className="bg-black/20 border-white/10 rounded-xl"
+                />
+                <p className="text-[9px] text-muted-foreground ml-1">Leave empty to publish immediately.</p>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">⏰ Auto-Expire (Optional)</label>
+                <Input 
+                  type="datetime-local"
+                  value={formData.expires_at}
+                  onChange={e => setFormData({...formData, expires_at: e.target.value})}
+                  className="bg-black/20 border-white/10 rounded-xl"
+                />
+                <p className="text-[9px] text-muted-foreground ml-1">The broadcast auto-hides after this date.</p>
+              </div>
+            </div>
             <Button 
               type="submit" 
               disabled={processing === "create"}
               className="w-full bg-primary text-primary-foreground font-bold h-11 rounded-xl"
             >
-              {processing === "create" ? <Loader2 className="animate-spin" /> : "Blast to All Members"}
+              {processing === "create" ? <Loader2 className="animate-spin" /> : (formData.publish_at && new Date(formData.publish_at) > new Date() ? "Schedule Broadcast" : "Blast to All Members")}
             </Button>
           </motion.form>
         ) : (
@@ -224,15 +259,23 @@ const BroadcastManager = () => {
                       <AlertCircle size={20} />
                     </div>
                     <div>
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <h4 className="font-bold">{a.title}</h4>
                         {!a.is_active && (
                           <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-muted text-muted-foreground">Archived</span>
                         )}
+                        {a.publish_at && new Date(a.publish_at) > new Date() && (
+                          <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-500">Scheduled</span>
+                        )}
+                        {a.expires_at && new Date(a.expires_at) < new Date() && (
+                          <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-red-500/10 text-red-500">Expired</span>
+                        )}
                       </div>
                       <p className="text-xs text-muted-foreground line-clamp-1 mb-2">{a.content}</p>
-                      <div className="flex items-center gap-3 text-[10px] text-muted-foreground font-medium">
+                      <div className="flex items-center gap-3 text-[10px] text-muted-foreground font-medium flex-wrap">
                         <span className="flex items-center gap-1"><Clock size={12} /> {format(new Date(a.created_at), 'MMM d, h:mm a')}</span>
+                        {a.publish_at && <span className="text-blue-500">Publishes: {format(new Date(a.publish_at), 'MMM d, h:mm a')}</span>}
+                        {a.expires_at && <span className="text-amber-500">Expires: {format(new Date(a.expires_at), 'MMM d, h:mm a')}</span>}
                       </div>
                     </div>
                   </div>

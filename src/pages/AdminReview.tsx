@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+import { ensureUrl } from "@/lib/utils-url";
 import PageLayout from "@/components/PageLayout";
 import { 
   CheckCircle, 
@@ -186,10 +187,10 @@ const AdminReview = () => {
                       </div>
 
                       <div className="flex gap-4">
-                        <a href={project.github_url} target="_blank" className="flex items-center gap-2 text-xs font-bold hover:text-primary transition-colors">
+                        <a href={ensureUrl(project.github_url)} target="_blank" className="flex items-center gap-2 text-xs font-bold hover:text-primary transition-colors">
                           <Github size={14} /> Repository
                         </a>
-                        <a href={project.live_url} target="_blank" className="flex items-center gap-2 text-xs font-bold hover:text-primary transition-colors">
+                        <a href={ensureUrl(project.live_url)} target="_blank" className="flex items-center gap-2 text-xs font-bold hover:text-primary transition-colors">
                           <ExternalLink size={14} /> Live View
                         </a>
                       </div>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+import { ensureUrl } from "@/lib/utils-url";
 import { 
   BookOpen, 
   Link as LinkIcon, 
@@ -244,7 +245,7 @@ const ResourceManager = () => {
                       </div>
                       <p className="text-xs text-muted-foreground line-clamp-1 mb-3">{res.description}</p>
                       <a 
-                        href={res.url} 
+                        href={ensureUrl(res.url)} 
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1.5 text-[10px] font-bold text-primary hover:underline"

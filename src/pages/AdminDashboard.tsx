@@ -37,7 +37,9 @@ const TABS: TabDef[] = [
   { key: "reports",       label: "Reports",       icon: BarChart2,    Component: ReportsPanel },
   { key: "settings",      label: "Settings",      icon: Settings,     Component: MaintenancePanel },
 ];
+import { Navigate } from "react-router-dom";
 
+// Redirect /admin to /admin/overview for backwards compatibility
 const AdminDashboard = () => {
   const { role, loading: authLoading } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -143,6 +145,7 @@ const AdminDashboard = () => {
       </div>
     </PageLayout>
   );
+  return <Navigate to="/admin" replace />;
 };
 
 export default AdminDashboard;

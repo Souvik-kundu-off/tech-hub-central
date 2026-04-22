@@ -2,13 +2,14 @@ import PageLayout from "@/components/PageLayout";
 import { BookOpen, FileText, Video, Wrench, ExternalLink, Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
+import { ensureUrl } from "@/lib/utils-url";
 
 interface ResourceItem {
   id: string;
   title: string;
   category: string;
   type: string;
-  link: string;
+  url: string;
 }
 
 const getIcon = (category: string) => {
@@ -76,7 +77,7 @@ const Resources = () => {
                   {section.items.map((item) => (
                     <a
                       key={item.id}
-                      href={item.link}
+                      href={ensureUrl(item.url)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="border border-border rounded-lg p-4 bg-card hover:border-foreground/20 transition-colors flex items-center justify-between group"

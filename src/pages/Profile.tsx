@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
+import { ensureUrl } from "@/lib/utils-url";
 import PageLayout from "@/components/PageLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -147,12 +148,12 @@ const Profile = () => {
               </div>
               <div className="flex justify-center gap-3 pt-2">
                 {profile?.github_url && (
-                  <a href={profile.github_url} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-accent hover:bg-primary/10 transition-colors">
+                  <a href={ensureUrl(profile.github_url)} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-accent hover:bg-primary/10 transition-colors">
                     <Github className="w-4 h-4" />
                   </a>
                 )}
                 {profile?.linkedin_url && (
-                  <a href={profile.linkedin_url} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-accent hover:bg-primary/10 transition-colors">
+                  <a href={ensureUrl(profile.linkedin_url)} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-accent hover:bg-primary/10 transition-colors">
                     <Linkedin className="w-4 h-4" />
                   </a>
                 )}
@@ -278,7 +279,7 @@ const Profile = () => {
                   </div>
                   <div className="space-y-2">
                     <Label className="text-xs uppercase tracking-wider text-muted-foreground flex items-center justify-between">
-                      GitHub URL {profile?.github_url && <a href={profile.github_url} target="_blank" className="text-primary hover:underline lowercase tracking-normal flex items-center gap-0.5"><ExternalLink className="w-2.5 h-2.5" /> visit</a>}
+                      GitHub URL {profile?.github_url && <a href={ensureUrl(profile.github_url)} target="_blank" className="text-primary hover:underline lowercase tracking-normal flex items-center gap-0.5"><ExternalLink className="w-2.5 h-2.5" /> visit</a>}
                     </Label>
                     <div className="relative">
                       <Github className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -293,7 +294,7 @@ const Profile = () => {
                   </div>
                   <div className="space-y-2 md:col-span-2">
                     <Label className="text-xs uppercase tracking-wider text-muted-foreground flex items-center justify-between">
-                      LinkedIn URL {profile?.linkedin_url && <a href={profile.linkedin_url} target="_blank" className="text-primary hover:underline lowercase tracking-normal flex items-center gap-0.5"><ExternalLink className="w-2.5 h-2.5" /> visit</a>}
+                      LinkedIn URL {profile?.linkedin_url && <a href={ensureUrl(profile.linkedin_url)} target="_blank" className="text-primary hover:underline lowercase tracking-normal flex items-center gap-0.5"><ExternalLink className="w-2.5 h-2.5" /> visit</a>}
                     </Label>
                     <div className="relative">
                       <Linkedin className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />

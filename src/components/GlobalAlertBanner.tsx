@@ -36,10 +36,13 @@ const GlobalAlertBanner = () => {
   }, []);
 
   const fetchActiveAnnouncement = async () => {
+    const now = new Date().toISOString();
     const { data, error } = await supabase
       .from("announcements")
       .select("*")
       .eq("is_active", true)
+      .or(`publish_at.is.null,publish_at.lte.${now}`)
+      .or(`expires_at.is.null,expires_at.gte.${now}`)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
