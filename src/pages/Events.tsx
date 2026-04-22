@@ -1,11 +1,12 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import PageLayout from "@/components/PageLayout";
-import { Calendar, MapPin, Users, Loader2 } from "lucide-react";
+import { Calendar, MapPin, Users, Loader2, ExternalLink, Globe, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 
-interface Event {
+interface EventRow {
   id: string;
   title: string;
   description: string;
@@ -15,6 +16,9 @@ interface Event {
   spots: number;
   mode: string;
   is_upcoming: boolean;
+  event_type: "inside" | "outside" | null;
+  external_url: string | null;
+  banner_url: string | null;
 }
 
 const filters = ["All", "Hackathon", "Workshop", "Competition", "Gaming"];
@@ -31,9 +35,8 @@ const Events = () => {
         .select("*")
         .eq("is_upcoming", tab === "upcoming")
         .order("created_at", { ascending: false });
-      
       if (error) throw error;
-      return data as Event[];
+      return data as EventRow[];
     },
   });
 
@@ -53,7 +56,6 @@ const Events = () => {
 
       <section className="section-padding">
         <div className="container mx-auto px-4">
-          {/* Tabs */}
           <div className="flex gap-1 mb-6 border border-border rounded-lg p-1 w-fit">
             {(["upcoming", "past"] as const).map((t) => (
               <button
@@ -68,7 +70,6 @@ const Events = () => {
             ))}
           </div>
 
-          {/* Filters */}
           <div className="flex flex-wrap gap-2 mb-8">
             {filters.map((f) => (
               <button
@@ -85,7 +86,6 @@ const Events = () => {
             ))}
           </div>
 
-          {/* Events Grid */}
           {isLoading ? (
             <div className="flex justify-center py-20">
               <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
@@ -96,22 +96,38 @@ const Events = () => {
             <div className="grid md:grid-cols-2 gap-4">
               {filtered.map((event) => (
                 <div key={event.id} className="border border-border rounded-lg p-6 bg-card hover:border-foreground/20 transition-colors">
-                  <div className="flex items-center gap-2 mb-3">
+                  <div className="flex items-center gap-2 mb-3 flex-wrap">
+                    <span className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${
+                      event.event_type === "inside" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+                    }`}>
+                      {event.event_type === "inside" ? <Layers size={10} /> : <Globe size={10} />}
+                      {event.event_type === "inside" ? "Inside" : "Outside"}
+                    </span>
                     <span className="text-[11px] font-medium uppercase tracking-wider text-primary">{event.type}</span>
-                    <span className="text-[11px] text-muted-foreground">•</span>
+                    <span className="text-[11px] text-muted-foreground">·</span>
                     <span className="text-[11px] text-muted-foreground">{event.mode}</span>
                   </div>
                   <h3 className="font-semibold text-lg mb-2">{event.title}</h3>
-                  <p className="text-sm text-muted-foreground mb-4">{event.description}</p>
+                  <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{event.description}</p>
                   <div className="flex flex-wrap gap-4 text-[13px] text-muted-foreground mb-4">
-                    <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> {event.date}</span>
-                    <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" /> {event.location}</span>
-                    <span className="flex items-center gap-1.5"><Users className="w-3.5 h-3.5" /> {event.spots} spots</span>
+                    {event.date && <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> {event.date}</span>}
+                    {event.location && <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" /> {event.location}</span>}
+                    {event.spots != null && <span className="flex items-center gap-1.5"><Users className="w-3.5 h-3.5" /> {event.spots} spots</span>}
                   </div>
                   {event.is_upcoming && (
-                    <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 text-xs h-8">
-                      Register Now
-                    </Button>
+                    event.event_type === "outside" && event.external_url ? (
+                      <a href={event.external_url} target="_blank" rel="noreferrer">
+                        <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 text-xs h-8 gap-1.5">
+                          <ExternalLink className="w-3.5 h-3.5" /> Register Externally
+                        </Button>
+                      </a>
+                    ) : (
+                      <Link to={`/events/${event.id}`}>
+                        <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 text-xs h-8">
+                          {event.event_type === "inside" ? "View & Register" : "View Details"}
+                        </Button>
+                      </Link>
+                    )
                   )}
                 </div>
               ))}

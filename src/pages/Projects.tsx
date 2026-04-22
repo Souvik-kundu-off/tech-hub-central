@@ -1,9 +1,12 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import PageLayout from "@/components/PageLayout";
-import { Search, Github, ExternalLink, Loader2 } from "lucide-react";
+import { Search, Github, ExternalLink, Loader2, Plus, FolderOpen, User2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/contexts/AuthContext";
 import { ensureUrl } from "@/lib/utils-url";
 
 interface Project {
@@ -11,8 +14,10 @@ interface Project {
   title: string;
   description: string;
   stack: string[];
+  author_id: string;
   author_name: string;
   category: string;
+  status: string;
   github_url: string;
   live_url: string;
 }
@@ -20,27 +25,46 @@ interface Project {
 const categories = ["All", "AI", "Web", "App", "Hardware"];
 
 const Projects = () => {
+  const { user } = useAuth();
+  const [tab, setTab] = useState<"public" | "mine">("public");
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("All");
 
-  const { data: projects = [], isLoading } = useQuery({
-    queryKey: ["projects"],
+  const { data: publicProjects = [], isLoading: loadingPublic } = useQuery({
+    queryKey: ["projects-public"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("projects")
         .select("*")
+        .eq("status", "approved")
         .order("created_at", { ascending: false });
-      
       if (error) throw error;
       return data as Project[];
     },
   });
 
-  const filtered = projects
+  const { data: myProjects = [], isLoading: loadingMine } = useQuery({
+    queryKey: ["projects-mine", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("projects")
+        .select("*")
+        .eq("author_id", user!.id)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data as Project[];
+    },
+  });
+
+  const isLoading = tab === "public" ? loadingPublic : loadingMine;
+  const source = tab === "public" ? publicProjects : myProjects;
+
+  const filtered = source
     .filter((p) => filter === "All" || p.category === filter)
-    .filter((p) => 
-      p.title.toLowerCase().includes(search.toLowerCase()) || 
-      p.description.toLowerCase().includes(search.toLowerCase())
+    .filter((p) =>
+      (p.title || "").toLowerCase().includes(search.toLowerCase()) ||
+      (p.description || "").toLowerCase().includes(search.toLowerCase())
     );
 
   return (
@@ -50,14 +74,44 @@ const Projects = () => {
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1.5">Projects</p>
           <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">Built by members.</h1>
           <p className="text-muted-foreground text-[15px] max-w-md mx-auto">
-            Real projects, real impact. Explore what our community has built.
+            Browse the community's approved projects, or manage your own submissions.
           </p>
         </div>
       </section>
 
       <section className="section-padding">
         <div className="container mx-auto px-4">
-          {/* Search & Filters */}
+          {/* Tabs + CTA */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div className="flex gap-1 border border-border rounded-lg p-1 w-fit">
+              <button
+                onClick={() => setTab("public")}
+                className={`px-4 py-1.5 text-sm rounded-md transition-colors flex items-center gap-1.5 ${
+                  tab === "public" ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <FolderOpen size={14} /> Public
+              </button>
+              {user && (
+                <button
+                  onClick={() => setTab("mine")}
+                  className={`px-4 py-1.5 text-sm rounded-md transition-colors flex items-center gap-1.5 ${
+                    tab === "mine" ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <User2 size={14} /> My Projects
+                  {myProjects.length > 0 && <span className="text-[10px] opacity-60 ml-1">{myProjects.length}</span>}
+                </button>
+              )}
+            </div>
+            {user && (
+              <Link to="/submit-project">
+                <Button size="sm" className="gap-1.5"><Plus size={14} /> Submit Project</Button>
+              </Link>
+            )}
+          </div>
+
+          {/* Search + filters */}
           <div className="flex flex-col sm:flex-row gap-4 mb-8">
             <div className="relative flex-1 max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -68,7 +122,7 @@ const Projects = () => {
                 className="pl-9 h-9 text-sm bg-card border-border"
               />
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               {categories.map((c) => (
                 <button
                   key={c}
@@ -90,11 +144,36 @@ const Projects = () => {
               <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
             </div>
           ) : filtered.length === 0 ? (
-            <p className="text-muted-foreground text-sm py-20 text-center">No projects found.</p>
+            <div className="text-center py-20">
+              <p className="text-muted-foreground text-sm mb-4">
+                {tab === "mine" ? "You haven't submitted any projects yet." : "No projects found."}
+              </p>
+              {tab === "mine" && (
+                <Link to="/submit-project">
+                  <Button size="sm" variant="outline" className="gap-1.5"><Plus size={14} /> Submit your first</Button>
+                </Link>
+              )}
+            </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filtered.map((p) => (
                 <div key={p.id} className="border border-border rounded-lg p-5 bg-card hover:border-foreground/20 transition-colors flex flex-col">
+                  <div className="flex items-center justify-between mb-2 gap-2">
+                    <div className="flex items-center gap-2 flex-wrap min-w-0">
+                      {p.category && <span className="text-[11px] font-medium uppercase tracking-wider text-primary">{p.category}</span>}
+                      {tab === "mine" && p.status !== "approved" && (
+                        <span className={`text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded ${
+                          p.status === "pending" ? "bg-blue-500/10 text-blue-500"
+                          : p.status === "rejected" ? "bg-destructive/10 text-destructive"
+                          : "bg-amber-500/10 text-amber-500"
+                        }`}>
+                          {p.status.replace("_", " ")}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex gap-2 shrink-0">
+                      {p.github_url && <a href={p.github_url} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-foreground"><Github className="w-3.5 h-3.5" /></a>}
+                      {p.live_url && <a href={p.live_url} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-foreground"><ExternalLink className="w-3.5 h-3.5" /></a>}
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-[11px] font-medium uppercase tracking-wider text-primary">{p.category}</span>
                     <div className="flex gap-2">
@@ -103,14 +182,17 @@ const Projects = () => {
                     </div>
                   </div>
                   <h3 className="font-semibold text-[15px] mb-1.5">{p.title}</h3>
-                  <p className="text-[13px] text-muted-foreground leading-relaxed mb-4 flex-1">{p.description}</p>
+                  <p className="text-[13px] text-muted-foreground leading-relaxed mb-4 flex-1 line-clamp-3">{p.description}</p>
                   <div className="flex flex-wrap gap-1.5 mb-3">
-                    {p.stack?.map((t, j) => (
+                    {p.stack?.slice(0, 5).map((t, j) => (
                       <span key={j} className="text-[11px] px-2 py-0.5 rounded bg-accent text-muted-foreground">{t}</span>
                     ))}
                   </div>
-                  <div className="pt-3 border-t border-border">
-                    <span className="text-xs text-muted-foreground">by {p.author_name}</span>
+                  <div className="pt-3 border-t border-border flex items-center justify-between gap-2">
+                    <span className="text-xs text-muted-foreground truncate">by {p.author_name || "—"}</span>
+                    {tab === "mine" && (
+                      <Link to={`/submit-project/${p.id}`} className="text-xs text-primary hover:underline">Edit</Link>
+                    )}
                   </div>
                 </div>
               ))}

@@ -6,10 +6,12 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index";
 import About from "./pages/About";
 import Events from "./pages/Events";
+import EventDetail from "./pages/EventDetail";
 import Projects from "./pages/Projects";
 import Team from "./pages/Team";
 import Resources from "./pages/Resources";
 import Blog from "./pages/Blog";
+import Broadcasts from "./pages/Broadcasts";
 import Gallery from "./pages/Gallery";
 import Contact from "./pages/Contact";
 import Leaderboard from "./pages/Leaderboard";
@@ -52,6 +54,35 @@ const App = () => (
           <GlobalAlertBanner />
           <OnboardingCheck>
             <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/dashboard" element={<Index />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/events" element={<Events />} />
+              <Route path="/events/:id" element={<EventDetail />} />
+              <Route path="/projects" element={<Projects />} />
+              <Route path="/team" element={<Team />} />
+              <Route path="/resources" element={<Resources />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/broadcasts" element={<Broadcasts />} />
+              <Route path="/gallery" element={<Gallery />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/leaderboard" element={<Leaderboard />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/onboarding" element={<Onboarding />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/my-projects" element={<MyProjects />} />
+              <Route path="/submit-project" element={<SubmitProject />} />
+              <Route path="/submit-project/:id" element={<SubmitProject />} />
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin-review" element={<AdminReview />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </OnboardingCheck>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
+  </QueryClientProvider>
 
             <Route path="/" element={<Index />} />
             <Route path="/dashboard" element={<Index />} />
@@ -93,6 +124,5 @@ const App = () => (
   </AuthProvider>
 </QueryClientProvider>
 );
-
 
 export default App;
