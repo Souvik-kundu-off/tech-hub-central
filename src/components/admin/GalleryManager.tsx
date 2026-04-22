@@ -32,7 +32,7 @@ const emptyForm = {
   is_visible: true,
 };
 
-const GalleryManager = () => {
+const GalleryManager = ({ readonly = false }: { readonly?: boolean }) => {
   const [items, setItems] = useState<GalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
@@ -134,6 +134,7 @@ const GalleryManager = () => {
             Manage photos and their albums. {items.length} total images.
           </p>
         </div>
+        {!readonly && (
         <Button
           onClick={() => setIsCreating(!isCreating)}
           className="rounded-xl gap-2 font-bold"
@@ -141,6 +142,7 @@ const GalleryManager = () => {
           {isCreating ? <FolderOpen size={18} /> : <Plus size={18} />}
           {isCreating ? "View Gallery" : "Add Image"}
         </Button>
+        )}
       </div>
 
       <AnimatePresence mode="wait">
@@ -278,7 +280,8 @@ const GalleryManager = () => {
                         <p className="text-[10px] text-muted-foreground truncate mt-0.5">{item.caption}</p>
                       )}
                     </div>
-                    {/* Actions overlay */}
+                    {/* Actions overlay — write only */}
+                    {!readonly && (
                     <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
                         onClick={() => toggleVisibility(item)}
@@ -295,6 +298,7 @@ const GalleryManager = () => {
                         <Trash2 size={12} />
                       </button>
                     </div>
+                    )}
                   </div>
                 ))}
               </div>

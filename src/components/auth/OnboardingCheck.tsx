@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-
+import { isStaff } from "@/lib/permissions";
 
 const OnboardingCheck = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
@@ -9,35 +9,20 @@ const OnboardingCheck = ({ children }: { children: React.ReactNode }) => {
   const { profile, loading, session } = useAuth();
 
   useEffect(() => {
-    if (loading) {
-      console.log("OnboardingCheck: Loading auth state...");
-      return;
-    }
-
-    if (!session) {
-      console.log("OnboardingCheck: No session, allowing guest access to login/signup");
-      return;
-    }
+    if (loading) return;
+    if (!session) return;
 
     const isAuthPage = ["/login", "/signup"].includes(location.pathname);
     const isOnboardingPage = location.pathname === "/onboarding";
 
-    // Case: Logged in but profile record doesn't exist yet or failed to load
     if (!profile) {
-      console.log("OnboardingCheck: No profile found for user", session.user.id);
-      if (!isOnboardingPage) {
-        console.log("OnboardingCheck: Redirecting to onboarding (missing profile)");
-        navigate("/onboarding", { replace: true });
-      }
+      if (!isOnboardingPage) navigate("/onboarding", { replace: true });
       return;
     }
 
-    // Skip onboarding check for admins
-    if (profile.role === "admin") {
-      console.log("OnboardingCheck: Admin user detected");
-      if (isOnboardingPage || isAuthPage) {
-        navigate("/", { replace: true });
-      }
+    // Skip onboarding for all staff roles (admin, faculty, event_manager, etc.)
+    if (isStaff(profile.role)) {
+      if (isOnboardingPage || isAuthPage) navigate("/", { replace: true });
       return;
     }
 

@@ -35,7 +35,7 @@ interface Project {
   created_at: string;
 }
 
-const ProjectModeration = () => {
+const ProjectModeration = ({ readonly = false }: { readonly?: boolean }) => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [reviewNote, setReviewNote] = useState<{ [key: string]: string }>({});
@@ -194,6 +194,7 @@ const ProjectModeration = () => {
                     </div>
                   </div>
 
+                  {!readonly ? (
                   <div className="lg:w-72 flex flex-col gap-3 border-l border-white/5 lg:pl-8">
                     <div className="space-y-1.5">
                       <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Admin Feedback</label>
@@ -258,8 +259,14 @@ const ProjectModeration = () => {
                         <Trash2 size={14} />
                       </Button>
                     </div>
-
                   </div>
+                  ) : (
+                    <div className="lg:w-48 border-l border-white/5 lg:pl-8 flex items-start">
+                      {project.review_note && (
+                        <p className="text-xs text-muted-foreground italic">"{project.review_note}"</p>
+                      )}
+                    </div>
+                  )}
                 </div>
               </motion.div>
             ))

@@ -1,85 +1,7 @@
-import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
-import { Loader2, BarChart2, TrendingUp, Users, Layers, Megaphone, Calendar } from "lucide-react";
-
-interface Counts {
-  members: number;
-  approvedProjects: number;
-  pendingProjects: number;
-  events: number;
-  registrations: number;
-  activeBroadcasts: number;
-}
-
-const ReportsPanel = () => {
-  const [counts, setCounts] = useState<Counts | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-      const [m, ap, pp, ev, reg, br] = await Promise.all([
-        supabase.from("profiles").select("id", { count: "exact", head: true }),
-        supabase.from("projects").select("id", { count: "exact", head: true }).eq("status", "approved"),
-        supabase.from("projects").select("id", { count: "exact", head: true }).eq("status", "pending"),
-        supabase.from("events").select("id", { count: "exact", head: true }),
-        supabase.from("event_registrations").select("id", { count: "exact", head: true }),
-        supabase.from("announcements").select("id", { count: "exact", head: true }).eq("is_active", true),
-      ]);
-      setCounts({
-        members: m.count ?? 0,
-        approvedProjects: ap.count ?? 0,
-        pendingProjects: pp.count ?? 0,
-        events: ev.count ?? 0,
-        registrations: reg.count ?? 0,
-        activeBroadcasts: br.count ?? 0,
-      });
-      setLoading(false);
-    })();
-  }, []);
-
-  if (loading || !counts) {
-    return <div className="flex justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /></div>;
-  }
-
-  const cards = [
-    { label: "Total Members", value: counts.members, icon: Users },
-    { label: "Approved Projects", value: counts.approvedProjects, icon: Layers },
-    { label: "Pending Review", value: counts.pendingProjects, icon: TrendingUp },
-    { label: "Events", value: counts.events, icon: Calendar },
-    { label: "Event Registrations", value: counts.registrations, icon: BarChart2 },
-    { label: "Active Broadcasts", value: counts.activeBroadcasts, icon: Megaphone },
-  ];
-
-  return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-bold flex items-center gap-2">
-          <BarChart2 size={20} className="text-primary" /> Reports
-        </h2>
-        <p className="text-sm text-muted-foreground">A high-level snapshot of community health.</p>
-      </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-        {cards.map((c) => (
-          <div key={c.label} className="border border-border rounded-xl p-5 bg-card">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-                <c.icon size={18} />
-              </div>
-            </div>
-            <p className="text-3xl font-bold tabular-nums">{c.value}</p>
-            <p className="text-xs text-muted-foreground uppercase tracking-wider mt-1">{c.label}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className="border border-dashed border-border rounded-xl p-6 text-sm text-muted-foreground">
-        More detailed time-series and per-cohort breakdowns can be added here. This panel pulls live counts directly from the database.
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import {
-  Download, Loader2, Users, Layout, Calendar, Trophy, FileText, FileSpreadsheet
+  Download, Loader2, Users, Layout, Calendar, Trophy, FileSpreadsheet, Megaphone, FileText, BookOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -95,10 +17,14 @@ interface ExportConfig {
   headers: string[];
   accent: string;
   filenamePrefix: string;
+  orderBy?: string;
+  orderAsc?: boolean;
+  filter?: { col: string; val: string };
 }
 
-const EXPORTS: ExportConfig[] = [
+const ALL_EXPORTS: (ExportConfig & { roles: string[] })[] = [
   {
+    roles: ["superadmin", "admin", "faculty", "moderator"],
     label: "Member Directory",
     description: "Full list of all registered members with email, programme, role, and points.",
     icon: Users,
@@ -109,6 +35,20 @@ const EXPORTS: ExportConfig[] = [
     filenamePrefix: "members",
   },
   {
+    roles: ["superadmin", "admin", "faculty", "moderator"],
+    label: "Leaderboard",
+    description: "Ranked list of members by hub credits — top performers highlighted.",
+    icon: Trophy,
+    table: "profiles",
+    columns: ["full_name", "email", "points", "programme_name"],
+    headers: ["Name", "Email", "Points", "Programme"],
+    accent: "text-yellow-500 bg-yellow-500/10 border-yellow-500/20",
+    filenamePrefix: "leaderboard",
+    orderBy: "points",
+    orderAsc: false,
+  },
+  {
+    roles: ["superadmin", "admin", "faculty", "moderator"],
     label: "Project Submissions",
     description: "All submitted projects with status, author, tech stack, and review notes.",
     icon: Layout,
@@ -119,6 +59,7 @@ const EXPORTS: ExportConfig[] = [
     filenamePrefix: "projects",
   },
   {
+    roles: ["superadmin", "admin", "event_manager"],
     label: "Events List",
     description: "Complete list of all events with date, location, type, and capacity.",
     icon: Calendar,
@@ -129,45 +70,58 @@ const EXPORTS: ExportConfig[] = [
     filenamePrefix: "events",
   },
   {
-    label: "Leaderboard",
-    description: "Ranked list of members by hub credits (points) — top performers highlighted.",
-    icon: Trophy,
-    table: "profiles",
-    columns: ["full_name", "email", "points", "programme_name"],
-    headers: ["Name", "Email", "Points", "Programme"],
-    accent: "text-yellow-500 bg-yellow-500/10 border-yellow-500/20",
-    filenamePrefix: "leaderboard",
+    roles: ["superadmin", "admin", "content_editor"],
+    label: "Blog Posts",
+    description: "All blog posts with publish status, category, and author.",
+    icon: FileText,
+    table: "blog_posts",
+    columns: ["title", "category", "author_name", "is_published", "published_at"],
+    headers: ["Title", "Category", "Author", "Published", "Date"],
+    accent: "text-indigo-500 bg-indigo-500/10 border-indigo-500/20",
+    filenamePrefix: "blog_posts",
+  },
+  {
+    roles: ["superadmin", "admin", "content_editor"],
+    label: "Resources",
+    description: "All community resources with type, category, and link.",
+    icon: BookOpen,
+    table: "resources",
+    columns: ["title", "type", "category", "url", "created_at"],
+    headers: ["Title", "Type", "Category", "URL", "Added"],
+    accent: "text-sky-500 bg-sky-500/10 border-sky-500/20",
+    filenamePrefix: "resources",
+  },
+  {
+    roles: ["superadmin", "admin", "content_editor", "event_manager"],
+    label: "Broadcasts",
+    description: "All system broadcasts with type, status, and schedule.",
+    icon: Megaphone,
+    table: "announcements",
+    columns: ["title", "type", "is_active", "publish_at", "expires_at", "created_at"],
+    headers: ["Title", "Type", "Active", "Publish At", "Expires At", "Created"],
+    accent: "text-orange-500 bg-orange-500/10 border-orange-500/20",
+    filenamePrefix: "broadcasts",
   },
 ];
 
-const ReportsPanel = () => {
+const ReportsPanel = ({ role }: { role?: string }) => {
   const [exporting, setExporting] = useState<string | null>(null);
 
+  const visibleExports = ALL_EXPORTS.filter(e => !role || e.roles.includes(role));
+
   const handleExport = async (config: ExportConfig) => {
-    setExporting(config.table + config.filenamePrefix);
+    const key = config.filenamePrefix;
+    setExporting(key);
     try {
       let query = supabase.from(config.table).select(config.columns.join(","));
-
-      // For leaderboard, sort by points descending
-      if (config.filenamePrefix === "leaderboard") {
-        query = query.order("points", { ascending: false });
-      } else {
-        query = query.order("created_at", { ascending: false });
-      }
+      if (config.filter) query = (query as any).eq(config.filter.col, config.filter.val);
+      if (config.orderBy) query = (query as any).order(config.orderBy, { ascending: config.orderAsc ?? false });
+      else query = (query as any).order("created_at", { ascending: false });
 
       const { data, error } = await query;
+      if (error) { toast.error(`Export failed: ${error.message}`); return; }
+      if (!data || data.length === 0) { toast.error("No data to export"); return; }
 
-      if (error) {
-        toast.error(`Export failed: ${error.message}`);
-        return;
-      }
-
-      if (!data || data.length === 0) {
-        toast.error("No data to export");
-        return;
-      }
-
-      // Convert to CSV
       const csvRows = [config.headers.join(",")];
       for (const row of data) {
         const values = config.columns.map(col => {
@@ -175,36 +129,24 @@ const ReportsPanel = () => {
           if (val === null || val === undefined) return "";
           if (Array.isArray(val)) return `"${val.join("; ")}"`;
           const str = String(val);
-          // Escape CSV special characters
-          if (str.includes(",") || str.includes('"') || str.includes("\n")) {
-            return `"${str.replace(/"/g, '""')}"`;
-          }
+          if (str.includes(",") || str.includes('"') || str.includes("\n")) return `"${str.replace(/"/g, '""')}"`;
           return str;
         });
         csvRows.push(values.join(","));
       }
 
-      const csvContent = csvRows.join("\n");
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const blob = new Blob([csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
-      const timestamp = new Date().toISOString().split("T")[0];
       link.href = url;
-      link.setAttribute("download", `${config.filenamePrefix}_${timestamp}.csv`);
+      link.setAttribute("download", `${key}_${new Date().toISOString().split("T")[0]}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
       toast.success(`${config.label} exported! (${data.length} rows)`);
-
-      await logAdminAction({
-        actionType: "EXPORT",
-        targetType: "REPORTS",
-        targetId: config.filenamePrefix,
-        targetLabel: config.label,
-        details: `Exported ${data.length} rows as CSV`,
-      });
+      await logAdminAction({ actionType: "EXPORT", targetType: "REPORTS", targetId: key, targetLabel: config.label, details: `Exported ${data.length} rows as CSV` });
     } catch (e: any) {
       toast.error("Export failed");
       console.error(e);
@@ -220,59 +162,61 @@ const ReportsPanel = () => {
         </h2>
         <p className="text-sm text-muted-foreground">
           Download hub data as CSV files for analysis, record-keeping, or presentations.
+          {role && role !== "admin" && role !== "superadmin" && (
+            <span className="ml-2 text-primary font-medium">(Showing reports relevant to your role)</span>
+          )}
         </p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-4">
-        {EXPORTS.map((config, index) => {
-          const Icon = config.icon;
-          const isExporting = exporting === config.table + config.filenamePrefix;
-
-          return (
-            <motion.div
-              key={config.filenamePrefix}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.08 }}
-              className="border border-white/5 rounded-[24px] p-6 bg-card/50 hover:border-primary/20 transition-all group"
-            >
-              <div className="flex items-start gap-4">
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center border shrink-0 ${config.accent}`}>
-                  <Icon size={22} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-sm mb-1">{config.label}</h3>
-                  <p className="text-[11px] text-muted-foreground leading-relaxed mb-4">
-                    {config.description}
-                  </p>
-                  <div className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-widest text-muted-foreground mb-4">
-                    {config.headers.slice(0, 4).map(h => (
-                      <span key={h} className="px-1.5 py-0.5 bg-white/5 rounded">{h}</span>
-                    ))}
-                    {config.headers.length > 4 && (
-                      <span className="px-1.5 py-0.5 bg-white/5 rounded">+{config.headers.length - 4}</span>
-                    )}
+      {visibleExports.length === 0 ? (
+        <div className="border border-dashed border-white/10 rounded-2xl py-20 text-center text-sm text-muted-foreground">
+          No reports are available for your role.
+        </div>
+      ) : (
+        <div className="grid md:grid-cols-2 gap-4">
+          {visibleExports.map((config, index) => {
+            const Icon = config.icon;
+            const isExporting = exporting === config.filenamePrefix;
+            return (
+              <motion.div
+                key={config.filenamePrefix}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.07 }}
+                className="border border-white/5 rounded-[24px] p-6 bg-card/50 hover:border-primary/20 transition-all group"
+              >
+                <div className="flex items-start gap-4">
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center border shrink-0 ${config.accent}`}>
+                    <Icon size={22} />
                   </div>
-                  <Button
-                    onClick={() => handleExport(config)}
-                    disabled={isExporting}
-                    variant="outline"
-                    size="sm"
-                    className="rounded-xl h-9 gap-2 font-bold"
-                  >
-                    {isExporting ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Download size={14} />
-                    )}
-                    {isExporting ? "Exporting..." : "Download CSV"}
-                  </Button>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-sm mb-1">{config.label}</h3>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed mb-4">{config.description}</p>
+                    <div className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-widest text-muted-foreground mb-4">
+                      {config.headers.slice(0, 4).map(h => (
+                        <span key={h} className="px-1.5 py-0.5 bg-white/5 rounded">{h}</span>
+                      ))}
+                      {config.headers.length > 4 && (
+                        <span className="px-1.5 py-0.5 bg-white/5 rounded">+{config.headers.length - 4}</span>
+                      )}
+                    </div>
+                    <Button
+                      onClick={() => handleExport(config)}
+                      disabled={isExporting}
+                      variant="outline"
+                      size="sm"
+                      className="rounded-xl h-9 gap-2 font-bold"
+                    >
+                      {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download size={14} />}
+                      {isExporting ? "Exporting..." : "Download CSV"}
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          );
-        })}
-      </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };

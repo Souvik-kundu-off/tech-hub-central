@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import PageLayout from "@/components/PageLayout";
-import { Search, Github, ExternalLink, Loader2, Plus, FolderOpen, User2 } from "lucide-react";
+import { Search, Github, ExternalLink, Loader2, Plus, FolderOpen, User2, Eye, Heart, Image as ImageIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { ensureUrl } from "@/lib/utils-url";
@@ -20,15 +20,36 @@ interface Project {
   status: string;
   github_url: string;
   live_url: string;
+  images: string[];
+  views_count: number | null;
+  likes_count: number | null;
 }
 
 const categories = ["All", "AI", "Web", "App", "Hardware"];
 
 const Projects = () => {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [tab, setTab] = useState<"public" | "mine">("public");
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("All");
+
+  // ── Realtime: invalidate queries on any projects table change ──
+  useEffect(() => {
+    const channel = supabase
+      .channel("projects-realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "projects" },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["projects-public"] });
+          if (user?.id) queryClient.invalidateQueries({ queryKey: ["projects-mine", user.id] });
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [user?.id, queryClient]);
 
   const { data: publicProjects = [], isLoading: loadingPublic } = useQuery({
     queryKey: ["projects-public"],
@@ -157,44 +178,80 @@ const Projects = () => {
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filtered.map((p) => (
-                <div key={p.id} className="border border-border rounded-lg p-5 bg-card hover:border-foreground/20 transition-colors flex flex-col">
-                  <div className="flex items-center justify-between mb-2 gap-2">
-                    <div className="flex items-center gap-2 flex-wrap min-w-0">
-                      {p.category && <span className="text-[11px] font-medium uppercase tracking-wider text-primary">{p.category}</span>}
-                      {tab === "mine" && p.status !== "approved" && (
-                        <span className={`text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded ${
-                          p.status === "pending" ? "bg-blue-500/10 text-blue-500"
-                          : p.status === "rejected" ? "bg-destructive/10 text-destructive"
-                          : "bg-amber-500/10 text-amber-500"
-                        }`}>
-                          {p.status.replace("_", " ")}
-                        </span>
+                <Link
+                  key={p.id}
+                  to={`/projects/${p.id}`}
+                  className="border border-border rounded-xl bg-card hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 transition-all flex flex-col overflow-hidden group"
+                >
+                  {/* Cover image */}
+                  {p.images?.[0] ? (
+                    <div className="w-full h-40 overflow-hidden bg-accent">
+                      <img
+                        src={p.images[0]}
+                        alt={p.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-full h-28 bg-gradient-to-br from-primary/5 to-accent flex items-center justify-center">
+                      <ImageIcon size={28} className="text-muted-foreground/30" />
+                    </div>
+                  )}
+
+                  <div className="p-5 flex flex-col flex-1">
+                    <div className="flex items-center justify-between mb-2 gap-2">
+                      <div className="flex items-center gap-2 flex-wrap min-w-0">
+                        {p.category && <span className="text-[11px] font-medium uppercase tracking-wider text-primary">{p.category}</span>}
+                        {tab === "mine" && p.status !== "approved" && (
+                          <span className={`text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded ${
+                            p.status === "pending" ? "bg-blue-500/10 text-blue-500"
+                            : p.status === "rejected" ? "bg-destructive/10 text-destructive"
+                            : "bg-amber-500/10 text-amber-500"
+                          }`}>
+                            {p.status.replace("_", " ")}
+                          </span>
+                        )}
+                      </div>
+                      {/* External link icons — stop propagation so they don't trigger the card Link */}
+                      <div className="flex gap-2 shrink-0">
+                        {p.github_url && (
+                          <a href={ensureUrl(p.github_url)} target="_blank" rel="noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-muted-foreground hover:text-foreground">
+                            <Github className="w-3.5 h-3.5" />
+                          </a>
+                        )}
+                        {p.live_url && (
+                          <a href={ensureUrl(p.live_url)} target="_blank" rel="noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-muted-foreground hover:text-foreground">
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </a>
+                        )}
+                      </div>
+                    </div>
+
+                    <h3 className="font-semibold text-[15px] mb-1.5 group-hover:text-primary transition-colors">{p.title}</h3>
+                    <p className="text-[13px] text-muted-foreground leading-relaxed mb-4 flex-1 line-clamp-2">{p.description}</p>
+
+                    <div className="flex flex-wrap gap-1.5 mb-3">
+                      {p.stack?.slice(0, 4).map((t, j) => (
+                        <span key={j} className="text-[11px] px-2 py-0.5 rounded bg-accent text-muted-foreground">{t}</span>
+                      ))}
+                      {p.stack?.length > 4 && (
+                        <span className="text-[11px] px-2 py-0.5 rounded bg-accent text-muted-foreground">+{p.stack.length - 4}</span>
                       )}
                     </div>
-                    <div className="flex gap-2 shrink-0">
-                      {p.github_url && <a href={p.github_url} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-foreground"><Github className="w-3.5 h-3.5" /></a>}
-                      {p.live_url && <a href={p.live_url} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-foreground"><ExternalLink className="w-3.5 h-3.5" /></a>}
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[11px] font-medium uppercase tracking-wider text-primary">{p.category}</span>
-                    <div className="flex gap-2">
-                      <a href={ensureUrl(p.github_url)} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors"><Github className="w-3.5 h-3.5" /></a>
-                      <a href={ensureUrl(p.live_url)} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors"><ExternalLink className="w-3.5 h-3.5" /></a>
+
+                    <div className="pt-3 border-t border-border flex items-center justify-between gap-2">
+                      <span className="text-xs text-muted-foreground truncate">by {p.author_name || "—"}</span>
+                      <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+                        {p.views_count ? <span className="flex items-center gap-1"><Eye size={11} />{p.views_count}</span> : null}
+                        {p.likes_count ? <span className="flex items-center gap-1"><Heart size={11} />{p.likes_count}</span> : null}
+                      </div>
                     </div>
                   </div>
-                  <h3 className="font-semibold text-[15px] mb-1.5">{p.title}</h3>
-                  <p className="text-[13px] text-muted-foreground leading-relaxed mb-4 flex-1 line-clamp-3">{p.description}</p>
-                  <div className="flex flex-wrap gap-1.5 mb-3">
-                    {p.stack?.slice(0, 5).map((t, j) => (
-                      <span key={j} className="text-[11px] px-2 py-0.5 rounded bg-accent text-muted-foreground">{t}</span>
-                    ))}
-                  </div>
-                  <div className="pt-3 border-t border-border flex items-center justify-between gap-2">
-                    <span className="text-xs text-muted-foreground truncate">by {p.author_name || "—"}</span>
-                    {tab === "mine" && (
-                      <Link to={`/submit-project/${p.id}`} className="text-xs text-primary hover:underline">Edit</Link>
-                    )}
-                  </div>
-                </div>
+                </Link>
               ))}
             </div>
           )}

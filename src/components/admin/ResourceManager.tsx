@@ -36,7 +36,7 @@ interface Resource {
   created_at: string;
 }
 
-const ResourceManager = () => {
+const ResourceManager = ({ readonly = false }: { readonly?: boolean }) => {
   const [resources, setResources] = useState<Resource[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
@@ -124,6 +124,7 @@ const ResourceManager = () => {
           </h2>
           <p className="text-sm text-muted-foreground">Manage external tools, guides, and developer templates.</p>
         </div>
+        {!readonly && (
         <Button 
           onClick={() => setIsCreating(!isCreating)} 
           className="rounded-xl gap-2 font-bold"
@@ -131,6 +132,7 @@ const ResourceManager = () => {
           {isCreating ? <FileText size={18} /> : <Plus size={18} />}
           {isCreating ? "View List" : "Add Resource"}
         </Button>
+        )}
       </div>
 
       <AnimatePresence mode="wait">
@@ -254,6 +256,7 @@ const ResourceManager = () => {
                       </a>
                     </div>
                   </div>
+                  {!readonly && (
                   <button 
                     onClick={() => handleDelete(res.id)}
                     disabled={processing === res.id}
@@ -261,6 +264,7 @@ const ResourceManager = () => {
                   >
                     {processing === res.id ? <Loader2 className="animate-spin w-4 h-4" /> : <Trash2 size={16} />}
                   </button>
+                  )}
                 </div>
               ))
             )}

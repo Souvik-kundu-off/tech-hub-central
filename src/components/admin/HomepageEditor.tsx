@@ -32,7 +32,7 @@ const CONTENT_FIELDS = [
   { key: "cta_subtext", label: "CTA Section Subtext", placeholder: "Join a community of makers...", type: "textarea" },
 ];
 
-const HomepageEditor = () => {
+const HomepageEditor = ({ readonly = false }: { readonly?: boolean }) => {
   const [content, setContent] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -129,11 +129,12 @@ const HomepageEditor = () => {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          {hasChanges && (
+          {hasChanges && !readonly && (
             <Button variant="ghost" onClick={handleReset} className="gap-2 rounded-xl">
               <RotateCcw size={14} /> Reset
             </Button>
           )}
+          {!readonly && (
           <Button
             onClick={handleSave}
             disabled={saving || !hasChanges}
@@ -142,6 +143,7 @@ const HomepageEditor = () => {
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save size={14} />}
             {saving ? "Saving..." : "Save Changes"}
           </Button>
+          )}
         </div>
       </div>
 

@@ -143,6 +143,27 @@ const MemberHome = () => {
     };
 
     void fetchData();
+
+    // ── Realtime: refresh projects when admin updates status/note ──
+    const channel = supabase
+      .channel("member-home-projects")
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "projects",
+          filter: `author_id=eq.${user.id}`,
+        },
+        (payload) => {
+          setUserProjects((prev) =>
+            prev.map((p) => p.id === payload.new.id ? { ...p, ...(payload.new as any) } : p)
+          );
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, [authLoading, user]);
 
   const getRank = (points: number) => {
@@ -310,14 +331,24 @@ const MemberHome = () => {
                         {p.status.replace("_", " ")}
                       </span>
                     </div>
-                    {p.review_note && (
-                      <div className="mt-2 flex items-start gap-2 p-2 rounded-lg bg-amber-500/5 border border-amber-500/10">
-                        <AlertCircle size={12} className="text-amber-500 mt-0.5 flex-shrink-0" />
-                        <p className="text-[10px] text-amber-500 italic leading-tight">
-                        Note: {p.review_note}
-                        </p>
-                      </div>
-                    )}
+                    {p.review_note && (() => {
+                      const noteStyle =
+                        p.status === "rejected"
+                          ? "bg-destructive/5 border-destructive/20 text-destructive"
+                          : p.status === "changes_requested"
+                          ? "bg-amber-500/5 border-amber-500/10 text-amber-400"
+                          : p.status === "approved"
+                          ? "bg-emerald-500/5 border-emerald-500/10 text-emerald-400"
+                          : "bg-blue-500/5 border-blue-500/10 text-blue-400";
+                      return (
+                        <div className={`mt-2 flex items-start gap-2 p-2 rounded-lg border ${noteStyle}`}>
+                          <AlertCircle size={12} className="mt-0.5 flex-shrink-0" />
+                          <p className="text-[10px] italic leading-tight">
+                            <span className="font-bold not-italic">Admin feedback: </span>{p.review_note}
+                          </p>
+                        </div>
+                      );
+                    })()}
                   </div>
                 ))
               ) : (

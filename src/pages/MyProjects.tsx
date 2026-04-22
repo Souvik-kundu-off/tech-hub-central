@@ -7,7 +7,7 @@ import PageLayout from "@/components/PageLayout";
 import { Button } from "@/components/ui/button";
 import {
   Plus, Edit3, Trash2, Loader2, ExternalLink, Github, Eye, Heart,
-  AlertCircle, CheckCircle2, Clock, FileEdit,
+  AlertCircle, CheckCircle2, Clock, FileEdit, MessageSquare, RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -47,6 +47,23 @@ const MyProjects = () => {
     if (authLoading) return;
     if (!user) { navigate("/login"); return; }
     fetchProjects();
+
+    // ── Realtime: re-fetch when any of this user's projects change ──
+    const channel = supabase
+      .channel("my-projects-realtime")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "projects",
+          filter: `author_id=eq.${user.id}`,
+        },
+        () => fetchProjects()
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, [user, authLoading]);
 
   const fetchProjects = async () => {
@@ -68,6 +85,20 @@ const MyProjects = () => {
     else {
       toast.success("Project deleted");
       setProjects((p) => p.filter((x) => x.id !== id));
+    }
+  };
+
+  const handleResubmit = async (id: string) => {
+    const { error } = await supabase
+      .from("projects")
+      .update({ status: "pending" })
+      .eq("id", id);
+    if (error) toast.error(error.message);
+    else {
+      toast.success("Project resubmitted for review!");
+      setProjects((prev) =>
+        prev.map((p) => p.id === id ? { ...p, status: "pending" } : p)
+      );
     }
   };
 
@@ -160,14 +191,30 @@ const MyProjects = () => {
                         )}
                         <span className="text-[11px] text-muted-foreground">· {format(new Date(p.created_at), "MMM d, yyyy")}</span>
                       </div>
-                      <h3 className="font-semibold text-base mb-1">{p.title || "Untitled draft"}</h3>
+                      <Link to={`/projects/${p.id}`}>
+                        <h3 className="font-semibold text-base mb-1 hover:text-primary transition-colors">{p.title || "Untitled draft"}</h3>
+                      </Link>
                       <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{p.description || "No description yet."}</p>
 
-                      {p.review_note && (p.status === "rejected" || p.status === "changes_requested") && (
-                        <div className="mb-3 p-3 rounded-md bg-amber-500/5 border border-amber-500/20 text-xs text-amber-600 dark:text-amber-400">
-                          <span className="font-semibold">Admin note:</span> {p.review_note}
-                        </div>
-                      )}
+                      {p.review_note && (() => {
+                        // Note styling depends on project status
+                        const noteStyle =
+                          p.status === "rejected"
+                            ? "bg-destructive/5 border-destructive/20 text-destructive"
+                            : p.status === "changes_requested"
+                            ? "bg-amber-500/5 border-amber-500/20 text-amber-600 dark:text-amber-400"
+                            : p.status === "approved"
+                            ? "bg-emerald-500/5 border-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+                            : "bg-blue-500/5 border-blue-500/20 text-blue-500";
+                        return (
+                          <div className={`mb-3 p-3 rounded-md border text-xs ${noteStyle}`}>
+                            <span className="font-semibold flex items-center gap-1.5 mb-1">
+                              <MessageSquare size={12} /> Admin feedback
+                            </span>
+                            {p.review_note}
+                          </div>
+                        );
+                      })()}
 
                       <div className="flex flex-wrap gap-1.5">
                         {p.stack?.slice(0, 5).map((s, i) => (
@@ -181,7 +228,16 @@ const MyProjects = () => {
                       </div>
                     </div>
 
-                    <div className="flex md:flex-col gap-2 md:w-40">
+                    <div className="flex md:flex-col gap-2 md:w-44">
+                      {p.status === "changes_requested" && (
+                        <Button
+                          size="sm"
+                          onClick={() => handleResubmit(p.id)}
+                          className="w-full gap-1.5 h-8 bg-amber-500 hover:bg-amber-600 text-white font-bold"
+                        >
+                          <RefreshCw size={13} /> Resubmit
+                        </Button>
+                      )}
                       <Link to={`/submit-project/${p.id}`} className="flex-1">
                         <Button variant="outline" size="sm" className="w-full gap-1.5 h-8">
                           <Edit3 size={13} /> Edit

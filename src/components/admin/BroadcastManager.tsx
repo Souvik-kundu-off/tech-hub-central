@@ -36,7 +36,7 @@ interface Announcement {
   created_at: string;
 }
 
-const BroadcastManager = () => {
+const BroadcastManager = ({ readonly = false }: { readonly?: boolean }) => {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
@@ -153,6 +153,7 @@ const BroadcastManager = () => {
           </h2>
           <p className="text-sm text-muted-foreground">Reach every member instantly with dashboard alerts.</p>
         </div>
+        {!readonly && (
         <Button 
           onClick={() => setIsCreating(!isCreating)} 
           className="rounded-xl gap-2 h-10 px-5"
@@ -160,6 +161,7 @@ const BroadcastManager = () => {
           {isCreating ? <Clock size={18} /> : <Plus size={18} />}
           {isCreating ? "View History" : "New Broadcast"}
         </Button>
+        )}
       </div>
 
       <AnimatePresence mode="wait">
@@ -279,6 +281,7 @@ const BroadcastManager = () => {
                       </div>
                     </div>
                   </div>
+                  {!readonly && (
                   <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button 
                       onClick={() => toggleStatus(a.id, a.is_active)}
@@ -295,6 +298,7 @@ const BroadcastManager = () => {
                       <Trash2 size={18} />
                     </button>
                   </div>
+                  )}
                 </div>
               ))
             )}

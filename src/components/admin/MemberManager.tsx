@@ -1,20 +1,12 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import { 
-  Users, 
-  Search, 
-  Trophy, 
-  Shield, 
-  ShieldCheck, 
-  PlusCircle, 
-  MinusCircle, 
-  Loader2,
-  ExternalLink,
-  Mail,
-  MoreVertical
-} from "lucide-react";
+import { Users, Search, Trophy, Shield, ShieldCheck, PlusCircle, MinusCircle,
+  Loader2, ExternalLink, Mail, MoreVertical, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -37,9 +29,44 @@ interface Member {
   created_at: string;
 }
 
-const MemberManager = () => {
+const ROLE_FILTER_OPTIONS = [
+  { value: "all",            label: "All Roles" },
+  { value: "member",         label: "Members" },
+  { value: "faculty",        label: "Faculty" },
+  { value: "event_manager",  label: "Event Managers" },
+  { value: "content_editor", label: "Content Editors" },
+  { value: "moderator",      label: "Moderators" },
+  { value: "admin",          label: "Admins" },
+  { value: "superadmin",     label: "Super Admins" },
+  { value: "guest",          label: "Guests" },
+];
+
+const ROLE_BADGE: Record<string, string> = {
+  superadmin:     "bg-red-500/10 text-red-500",
+  admin:          "bg-primary/10 text-primary",
+  faculty:        "bg-blue-500/10 text-blue-500",
+  event_manager:  "bg-purple-500/10 text-purple-500",
+  content_editor: "bg-emerald-500/10 text-emerald-500",
+  moderator:      "bg-amber-500/10 text-amber-500",
+  member:         "bg-white/5 text-muted-foreground",
+  guest:          "bg-white/5 text-muted-foreground",
+};
+
+const ROLE_LABEL: Record<string, string> = {
+  superadmin:     "Super Admin",
+  admin:          "Admin",
+  faculty:        "Faculty",
+  event_manager:  "Event Mgr",
+  content_editor: "Editor",
+  moderator:      "Moderator",
+  member:         "Member",
+  guest:          "Guest",
+};
+
+const MemberManager = ({ readonly = false, canManageRoles = false }: { readonly?: boolean; canManageRoles?: boolean }) => {
   const [members, setMembers] = useState<Member[]>([]);
   const [search, setSearch] = useState("");
+  const [roleFilter, setRoleFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -110,10 +137,11 @@ const MemberManager = () => {
     setProcessing(null);
   };
 
-  const filtered = members.filter(m => 
-    m.full_name?.toLowerCase().includes(search.toLowerCase()) || 
-    m.email?.toLowerCase().includes(search.toLowerCase()) ||
-    m.programme_name?.toLowerCase().includes(search.toLowerCase())
+  const filtered = members.filter(m =>
+    (roleFilter === "all" || m.role === roleFilter) &&
+    (m.full_name?.toLowerCase().includes(search.toLowerCase()) ||
+     m.email?.toLowerCase().includes(search.toLowerCase()) ||
+     m.programme_name?.toLowerCase().includes(search.toLowerCase()))
   );
 
   const toggleSelect = (id: string) => {
@@ -193,19 +221,35 @@ const MemberManager = () => {
           </h2>
           <p className="text-sm text-muted-foreground">Manage roles, audit contributions, and award credits.</p>
         </div>
-        <div className="relative w-full md:w-64">
+        {/* Search + Role Filter */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input 
-            placeholder="Search name, email, or dept..." 
+          <Input
+            placeholder="Search name, email, or dept..."
             className="pl-9 bg-card border-white/10 rounded-xl"
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
         </div>
+        <div className="flex items-center gap-2">
+          <Filter className="w-4 h-4 text-muted-foreground shrink-0" />
+          <Select value={roleFilter} onValueChange={v => { setRoleFilter(v); setSelectedIds(new Set()); }}>
+            <SelectTrigger className="bg-card border-white/10 rounded-xl w-[160px]">
+              <SelectValue placeholder="All Roles" />
+            </SelectTrigger>
+            <SelectContent>
+              {ROLE_FILTER_OPTIONS.map(opt => (
+                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
       </div>
 
-      {/* Bulk Actions Bar */}
-      {selectedIds.size > 0 && (
+      {/* Bulk Actions Bar — write-only */}
+      {selectedIds.size > 0 && !readonly && (
         <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4 flex flex-wrap items-center gap-3">
           <span className="text-sm font-bold text-primary">{selectedIds.size} selected</span>
           <div className="h-4 w-px bg-white/10" />
@@ -223,6 +267,7 @@ const MemberManager = () => {
           <Button size="sm" variant="outline" onClick={bulkEmail} className="h-8 rounded-lg text-xs gap-1">
             <Mail size={12} /> Group Email
           </Button>
+          {canManageRoles && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button size="sm" variant="outline" className="h-8 rounded-lg text-xs gap-1">
@@ -231,9 +276,15 @@ const MemberManager = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuItem onClick={() => bulkChangeRole("member")}>Set to Member</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => bulkChangeRole("faculty")}>Set to Faculty</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => bulkChangeRole("event_manager")}>Set to Event Manager</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => bulkChangeRole("content_editor")}>Set to Content Editor</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => bulkChangeRole("moderator")}>Set to Moderator</DropdownMenuItem>
+              <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => bulkChangeRole("admin")}>Set to Admin</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          )}
           <Button size="sm" variant="ghost" onClick={() => setSelectedIds(new Set())} className="h-8 rounded-lg text-xs text-muted-foreground ml-auto">
             Clear
           </Button>
@@ -292,27 +343,32 @@ const MemberManager = () => {
                       <span className="text-[11px] font-medium text-muted-foreground">{member.programme_name || "Nexus Explorer"}</span>
                     </td>
                     <td className="p-4">
-                      <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-black uppercase ${member.role === 'admin' ? 'bg-primary/10 text-primary' : 'bg-white/5 text-muted-foreground'}`}>
-                        {member.role === 'admin' ? <ShieldCheck size={10} /> : <Shield size={10} />}
-                        {member.role === 'admin' ? 'Overseer' : 'Hub Member'}
+                      <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-black uppercase ${ROLE_BADGE[member.role] || "bg-white/5 text-muted-foreground"}`}>
+                        {member.role === 'admin' || member.role === 'superadmin' ? <ShieldCheck size={10} /> : <Shield size={10} />}
+                        {ROLE_LABEL[member.role] || member.role}
                       </div>
                     </td>
                     <td className="p-4 text-center">
                       <div className="flex items-center justify-center gap-3">
-                        <button 
-                          onClick={() => handlePointAdjustment(member.id, -10)}
-                          disabled={processing === member.id}
-                          className="text-muted-foreground hover:text-destructive transition-colors"
-                        ><MinusCircle size={16} /></button>
+                        {!readonly && (
+                          <button 
+                            onClick={() => handlePointAdjustment(member.id, -10)}
+                            disabled={processing === member.id}
+                            className="text-muted-foreground hover:text-destructive transition-colors"
+                          ><MinusCircle size={16} /></button>
+                        )}
                         <span className="text-sm font-black tabular-nums min-w-[30px]">{member.points}</span>
-                        <button 
-                          onClick={() => handlePointAdjustment(member.id, 10)}
-                          disabled={processing === member.id}
-                          className="text-primary hover:scale-110 transition-all"
-                        ><PlusCircle size={16} /></button>
+                        {!readonly && (
+                          <button 
+                            onClick={() => handlePointAdjustment(member.id, 10)}
+                            disabled={processing === member.id}
+                            className="text-primary hover:scale-110 transition-all"
+                          ><PlusCircle size={16} /></button>
+                        )}
                       </div>
                     </td>
                     <td className="p-4 text-right">
+                    {!readonly && (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
@@ -320,19 +376,30 @@ const MemberManager = () => {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48">
-                          <DropdownMenuLabel>Nexus Actions</DropdownMenuLabel>
+                          <DropdownMenuLabel>Member Actions</DropdownMenuLabel>
                           <DropdownMenuItem onClick={() => window.open(`mailto:${member.email}`)} className="gap-2">
                              <Mail size={14} /> Send Email
                           </DropdownMenuItem>
+                          {canManageRoles && (
+                          <>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => toggleRole(member.id, member.role)} className="gap-2">
-                             <Shield size={14} /> {member.role === 'admin' ? 'Demote to Member' : 'Promote to Admin'}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="text-destructive focus:text-destructive gap-2">
-                             <ExternalLink size={14} /> Ban from Hub
-                          </DropdownMenuItem>
+                          <DropdownMenuLabel className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Change Role</DropdownMenuLabel>
+                          {(["member","faculty","event_manager","content_editor","moderator","admin","superadmin"] as const).filter(r => r !== member.role).map(r => (
+                            <DropdownMenuItem key={r} onClick={() => {
+                              if (!confirm(`Change ${member.full_name} to ${r}?`)) return;
+                              supabase.from("profiles").update({ role: r }).eq("id", member.id).then(({ error }) => {
+                                if (error) toast.error("Role update failed");
+                                else { setMembers(prev => prev.map(m => m.id === member.id ? { ...m, role: r } : m)); toast.success(`Role updated to ${r}`); }
+                              });
+                            }} className="gap-2 capitalize">
+                              <Shield size={14} /> Set as {r.replace("_", " ")}
+                            </DropdownMenuItem>
+                          ))}
+                          </>
+                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
+                    )}
                     </td>
                   </tr>
                 ))

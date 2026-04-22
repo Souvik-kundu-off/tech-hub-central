@@ -39,7 +39,7 @@ const emptyForm = {
 
 const CATEGORIES = ["Announcement", "Tutorial", "Event Recap", "Community", "Tech Insight", "Opinion"];
 
-const BlogManager = () => {
+const BlogManager = ({ readonly = false }: { readonly?: boolean }) => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<string | null>(null);
@@ -155,7 +155,7 @@ const BlogManager = () => {
             Create and manage blog posts. {posts.filter(p => p.is_published).length} published, {posts.filter(p => !p.is_published).length} drafts.
           </p>
         </div>
-        {!showForm && (
+        {!showForm && !readonly && (
           <Button onClick={() => { setCreating(true); setForm(emptyForm); }} className="gap-2">
             <Plus size={16} /> New Post
           </Button>
@@ -259,6 +259,7 @@ const BlogManager = () => {
                     </span>
                   )}
                 </div>
+                {!readonly && (
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-4">
                   <button onClick={() => togglePublish(post)} className={`p-2 rounded-lg transition-colors ${post.is_published ? "text-amber-500 hover:bg-amber-500/10" : "text-emerald-500 hover:bg-emerald-500/10"}`}>
                     {post.is_published ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -270,6 +271,7 @@ const BlogManager = () => {
                     <Trash2 size={16} />
                   </button>
                 </div>
+                )}
               </div>
             ))}
           </div>
