@@ -140,10 +140,39 @@ const EventDetail = () => {
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight mb-3">{event.title}</h1>
             <p className="text-muted-foreground leading-relaxed mb-6">{event.description}</p>
 
-            <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-8 pb-8 border-b border-border">
+            <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-6">
               <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4" /> {event.date || "To be discussed"}</span>
               {event.location && <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4" /> {event.location}</span>}
               {event.spots != null && <span className="flex items-center gap-1.5"><Users className="w-4 h-4" /> {event.spots} spots</span>}
+            </div>
+
+            {/* Event Info card */}
+            <div className="border border-border rounded-xl p-4 bg-card space-y-3 mb-8">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Event Info</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Calendar className="w-4 h-4 shrink-0 text-primary" />
+                  <span>{event.date || "TBD"}</span>
+                </div>
+                {event.location && (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <MapPin className="w-4 h-4 shrink-0 text-primary" />
+                    <span>{event.location}</span>
+                  </div>
+                )}
+                {event.spots != null && (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Users className="w-4 h-4 shrink-0 text-primary" />
+                    <span>{event.spots} spots</span>
+                  </div>
+                )}
+                {event.mode && (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    {event.mode === "Online" ? <Globe className="w-4 h-4 shrink-0 text-primary" /> : <Layers className="w-4 h-4 shrink-0 text-primary" />}
+                    <span>{event.mode}</span>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Outside */}
@@ -250,35 +279,6 @@ const EventDetail = () => {
                 </div>
               </div>
             )}
-
-            {/* Quick info card below banner */}
-            <div className="mt-4 border border-border rounded-xl p-4 bg-card space-y-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Event Info</h3>
-              <div className="space-y-2.5 text-sm">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Calendar className="w-4 h-4 shrink-0 text-primary" />
-                  <span>{event.date || "To be discussed"}</span>
-                </div>
-                {event.location && (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <MapPin className="w-4 h-4 shrink-0 text-primary" />
-                    <span>{event.location}</span>
-                  </div>
-                )}
-                {event.spots != null && (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Users className="w-4 h-4 shrink-0 text-primary" />
-                    <span>{event.spots} spots available</span>
-                  </div>
-                )}
-                {event.mode && (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    {event.mode === "Online" ? <Globe className="w-4 h-4 shrink-0 text-primary" /> : <Layers className="w-4 h-4 shrink-0 text-primary" />}
-                    <span>{event.mode}</span>
-                  </div>
-                )}
-              </div>
-            </div>
           </div>
         </div>
       </section>

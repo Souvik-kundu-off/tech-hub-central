@@ -19,6 +19,7 @@ const GuestNavbar = () => {
     { label: "Home", href: "/" },
     { label: "About", href: "/about" },
     { label: "Projects", href: "/projects" },
+    { label: "Events", href: "/events" },
     { label: "Gallery", href: "/gallery" },
     { label: "Team", href: "/team" },
     { label: "Contact", href: "/contact" },

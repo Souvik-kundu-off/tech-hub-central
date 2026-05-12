@@ -401,8 +401,11 @@ const MemberHome = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
-            className="lg:col-span-1 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl sm:rounded-[30px] p-5 sm:p-6 flex flex-col justify-between overflow-hidden relative group"
+            className={`lg:col-span-1 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl sm:rounded-[30px] p-5 sm:p-6 flex flex-col justify-between overflow-hidden relative group ${nextEvent ? "cursor-pointer hover:border-indigo-500/40" : ""}`}
           >
+            {nextEvent ? (
+              <Link to={`/events/${nextEvent.id}`} className="absolute inset-0 z-10" />
+            ) : null}
              <div className="flex items-center gap-2 mb-2">
                 <div className="w-6 h-6 rounded bg-indigo-500/20 flex items-center justify-center">
                   <Clock size={12} className="text-indigo-400" />
