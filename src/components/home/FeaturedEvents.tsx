@@ -24,20 +24,20 @@ const FeaturedEvents = () => {
     <section className="section-padding relative overflow-hidden">
       {/* Floating GSA logos */}
       <img src="/All logo GSA/Gemini Sparkle.png" alt="" aria-hidden="true"
-        className="absolute top-8 right-[5%] w-20 md:w-28 opacity-30 pointer-events-none select-none"
+        className="hidden sm:block absolute top-8 right-[5%] w-14 md:w-28 opacity-30 pointer-events-none select-none"
         style={{ animation: "sectionFloat 7s ease-in-out infinite" }} />
       <img src="/All logo GSA/07 (1).png" alt="" aria-hidden="true"
-        className="absolute bottom-10 left-[4%] w-16 md:w-24 opacity-30 pointer-events-none select-none"
+        className="hidden sm:block absolute bottom-10 left-[4%] w-12 md:w-24 opacity-30 pointer-events-none select-none"
         style={{ animation: "sectionFloat 9s ease-in-out 1.5s infinite" }} />
       <style>{`@keyframes sectionFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-15px)} }`}</style>
 
       <div className="container mx-auto px-4 relative z-10">
-        <div className="flex items-end justify-between mb-10">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-8 sm:mb-10">
           <div>
             <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1.5">Upcoming</p>
-            <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Featured Events</h2>
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">Featured Events</h2>
           </div>
-          <Link to="/events" className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+          <Link to="/events" className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 shrink-0">
             View all <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -49,7 +49,7 @@ const FeaturedEvents = () => {
         ) : events.length === 0 ? (
           <p className="text-muted-foreground text-sm py-10 text-center">No upcoming events found.</p>
         ) : (
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
             {events.map((event) => (
               <div key={event.id} className="group border border-border rounded-lg p-5 hover:border-foreground/20 transition-colors bg-card">
                 <div className="flex items-center justify-between mb-3">

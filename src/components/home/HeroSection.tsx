@@ -35,7 +35,7 @@ const HeroSection = () => {
   }, []);
 
   return (
-    <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden pt-14">
+    <section className="relative min-h-[70vh] sm:min-h-[80vh] md:min-h-[90vh] flex items-center justify-center overflow-hidden pt-20 sm:pt-14">
       {/* Subtle grid background */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:64px_64px]" />
       {/* Radial fade */}
@@ -46,28 +46,28 @@ const HeroSection = () => {
         src="/All logo GSA/element.webp"
         alt=""
         aria-hidden="true"
-        className="absolute top-24 left-[8%] w-16 md:w-24 opacity-100 pointer-events-none select-none"
+        className="hidden sm:block absolute top-24 left-[8%] w-10 sm:w-14 md:w-20 lg:w-24 opacity-100 pointer-events-none select-none"
         style={{ animation: "heroFloat 6s ease-in-out infinite" }}
       />
       <img
         src="/All logo GSA/05 (9).png"
         alt=""
         aria-hidden="true"
-        className="absolute top-32 right-[12%] w-15 md:w-28 opacity-100 pointer-events-none select-none"
+        className="hidden sm:block absolute top-32 right-[12%] w-10 sm:w-14 md:w-20 lg:w-28 opacity-100 pointer-events-none select-none"
         style={{ animation: "heroFloat 8s ease-in-out 1s infinite" }}
       />
       <img
         src="/All logo GSA/04 (8).png"
         alt=""
         aria-hidden="true"
-        className="absolute bottom-28 left-[12%] w-15 md:w-28 opacity-100 pointer-events-none select-none rotate-45"
+        className="hidden md:block absolute bottom-28 left-[12%] w-14 md:w-20 lg:w-28 opacity-100 pointer-events-none select-none rotate-45"
         style={{ animation: "heroFloat 7s ease-in-out 2s infinite" }}
       />
       <img
         src="/All logo GSA/01 (5).png"
         alt=""
         aria-hidden="true"
-        className="absolute bottom-36 right-[10%] w-12 md:w-16 opacity-100 pointer-events-none select-none"
+        className="hidden md:block absolute bottom-36 right-[10%] w-10 md:w-14 lg:w-16 opacity-100 pointer-events-none select-none"
         style={{ animation: "heroFloat 9s ease-in-out 0.5s infinite" }}
       />
 
@@ -78,7 +78,7 @@ const HeroSection = () => {
         }
       `}</style>
 
-      <div className="container mx-auto px-4 relative z-10 text-center">
+      <div className="container mx-auto px-5 sm:px-4 relative z-10 text-center">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border text-xs text-muted-foreground mb-8 animate-fade-up">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
           {content.hero_badge}
@@ -108,7 +108,7 @@ const HeroSection = () => {
         </div>
 
         {/* Minimal stats strip */}
-        <div className="flex justify-center gap-12 mt-20 animate-fade-up animate-fade-up-delay-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8 md:gap-12 mt-12 sm:mt-16 md:mt-20 animate-fade-up animate-fade-up-delay-3 max-w-md sm:max-w-none mx-auto">
           {[
             { value: content.stat_members, label: "Members" },
             { value: content.stat_events, label: "Events" },
@@ -116,8 +116,8 @@ const HeroSection = () => {
             { value: content.stat_wins, label: "Wins" },
           ].map((s, i) => (
             <div key={i} className="text-center">
-              <p className="text-2xl font-bold tracking-tight">{s.value}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{s.label}</p>
+              <p className="text-xl sm:text-2xl font-bold tracking-tight">{s.value}</p>
+              <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">{s.label}</p>
             </div>
           ))}
         </div>

@@ -56,7 +56,7 @@ const Leaderboard = () => {
           ) : (
             <>
               {/* Top 3 highlight */}
-              <div className="grid grid-cols-3 gap-4 mb-10">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
                 {topContributors.slice(0, 3).map((c, i) => {
                   const rank = i + 1;
                   return (
@@ -81,26 +81,28 @@ const Leaderboard = () => {
               </div>
 
               {/* Table */}
-              <div className="border border-border rounded-lg overflow-hidden">
-                <div className="grid grid-cols-[40px_1fr_80px_80px_80px] gap-4 px-4 py-2.5 bg-accent text-xs text-muted-foreground font-medium uppercase tracking-wider">
-                  <span>#</span>
-                  <span>Member</span>
-                  <span className="text-right">Points</span>
-                  <span className="text-right">Projects</span>
-                  <span className="text-right">Wins</span>
-                </div>
-                {topContributors.map((c, i) => (
-                  <div
-                    key={c.id}
-                    className="grid grid-cols-[40px_1fr_80px_80px_80px] gap-4 px-4 py-3 border-t border-border items-center hover:bg-accent/50 transition-colors"
-                  >
-                    <RankIcon rank={i + 1} />
-                    <span className="text-sm font-medium">{c.full_name}</span>
-                    <span className="text-sm text-right text-primary font-semibold">{c.points}</span>
-                    <span className="text-sm text-right text-muted-foreground">{c.projects_count}</span>
-                    <span className="text-sm text-right text-muted-foreground">{c.wins_count}</span>
+              <div className="border border-border rounded-lg overflow-x-auto">
+                <div className="min-w-[500px]">
+                  <div className="grid grid-cols-[40px_1fr_80px_80px_80px] gap-4 px-4 py-2.5 bg-accent text-xs text-muted-foreground font-medium uppercase tracking-wider">
+                    <span>#</span>
+                    <span>Member</span>
+                    <span className="text-right">Points</span>
+                    <span className="text-right">Projects</span>
+                    <span className="text-right">Wins</span>
                   </div>
-                ))}
+                  {topContributors.map((c, i) => (
+                    <div
+                      key={c.id}
+                      className="grid grid-cols-[40px_1fr_80px_80px_80px] gap-4 px-4 py-3 border-t border-border items-center hover:bg-accent/50 transition-colors"
+                    >
+                      <RankIcon rank={i + 1} />
+                      <span className="text-sm font-medium truncate">{c.full_name}</span>
+                      <span className="text-sm text-right text-primary font-semibold">{c.points}</span>
+                      <span className="text-sm text-right text-muted-foreground">{c.projects_count}</span>
+                      <span className="text-sm text-right text-muted-foreground">{c.wins_count}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </>
           )}

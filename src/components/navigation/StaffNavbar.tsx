@@ -77,7 +77,7 @@ const StaffNavbar = () => {
             <img
               src="/Uni logo/full techclub-transparent.png"
               alt="TechClub"
-              className="h-16 w-auto transition-transform group-hover:scale-105"
+              className="h-12 sm:h-16 w-auto transition-transform group-hover:scale-105"
             />
             <span className="hidden md:inline-flex items-center px-2 py-0.5 rounded-md bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider">
               {roleLabel}

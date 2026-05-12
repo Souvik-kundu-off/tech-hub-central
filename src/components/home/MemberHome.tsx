@@ -197,7 +197,7 @@ const MemberHome = () => {
   }
 
   return (
-    <div className="relative min-h-screen pt-24 pb-20 overflow-hidden">
+    <div className="relative min-h-screen pt-20 sm:pt-24 pb-12 sm:pb-20 overflow-hidden">
       {/* Background Atmosphere */}
       <div className="absolute top-0 left-0 w-full h-full -z-10 pointer-events-none overflow-hidden">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 rounded-full blur-[120px] animate-pulse" />
@@ -217,7 +217,7 @@ const MemberHome = () => {
                 <Sparkles size={12} />
                 Nexus Command Center
               </div>
-              <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-2">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-2">
                 Hey, <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-indigo-400">{profile?.full_name?.split(" ")[0]}</span>
               </h1>
               <p className="text-muted-foreground flex items-center gap-2">
@@ -225,7 +225,7 @@ const MemberHome = () => {
                 Working as <span className="text-foreground font-semibold">{profile?.role === 'admin' ? 'Nexus Overseer' : 'Tech Explorer'}</span>
               </p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               {profile?.role === 'admin' && (
                 <Link to="/admin-review">
                   <Button size="sm" variant="outline" className="rounded-xl border-primary/20 bg-primary/5 hover:bg-primary/10 transition-all font-bold h-10 px-5 text-primary">
@@ -243,24 +243,24 @@ const MemberHome = () => {
         </header>
 
         {/* Bento Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-auto lg:auto-rows-[180px]">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-auto">
           
           {/* Rank & Points Card */}
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="lg:col-span-2 row-span-2 bg-gradient-to-br from-card/80 to-card/40 backdrop-blur-xl border border-white/10 rounded-[32px] p-8 flex flex-col justify-between group overflow-hidden relative"
+            className="lg:col-span-2 lg:row-span-2 bg-gradient-to-br from-card/80 to-card/40 backdrop-blur-xl border border-white/10 rounded-2xl sm:rounded-[32px] p-5 sm:p-8 flex flex-col justify-between group overflow-hidden relative"
           >
             <div className="relative z-10">
               <div className="flex justify-between items-start mb-6">
                 <div>
                   <p className="text-muted-foreground text-xs uppercase font-bold tracking-widest mb-1">Rank Progression</p>
-                  <h3 className={`text-3xl font-black ${rank.color} flex items-center gap-2`}>
+                  <h3 className={`text-2xl sm:text-3xl font-black ${rank.color} flex items-center gap-2`}>
                     <rank.icon size={32} /> {rank.name}
                   </h3>
                 </div>
                 <div className="text-right">
-                  <p className="text-4xl font-black text-foreground">{profile?.points}</p>
+                  <p className="text-2xl sm:text-4xl font-black text-foreground">{profile?.points}</p>
                   <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-tighter">Total Credits</p>
                 </div>
               </div>
@@ -288,7 +288,7 @@ const MemberHome = () => {
               <div className="space-y-2">
                 {pointsHistory.map((item) => (
                   <div key={item.id} className="flex items-center justify-between p-2 rounded-xl bg-white/5 border border-white/5">
-                    <span className="text-xs text-muted-foreground truncate max-w-[180px]">{item.description}</span>
+                    <span className="text-xs text-muted-foreground truncate max-w-[150px] sm:max-w-[180px]">{item.description}</span>
                     <span className="text-xs font-bold text-primary">+{item.amount}</span>
                   </div>
                 ))}
@@ -305,7 +305,7 @@ const MemberHome = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="lg:col-span-2 row-span-2 bg-card/60 backdrop-blur-lg border border-white/10 rounded-[32px] p-8 flex flex-col group overflow-hidden"
+            className="lg:col-span-2 lg:row-span-2 bg-card/60 backdrop-blur-lg border border-white/10 rounded-2xl sm:rounded-[32px] p-5 sm:p-8 flex flex-col group overflow-hidden"
           >
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2">
@@ -326,7 +326,7 @@ const MemberHome = () => {
                 userProjects.map((p) => (
                   <div key={p.id} className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-white/20 transition-colors">
                     <div className="flex items-center justify-between mb-2">
-                      <h4 className="text-sm font-bold truncate max-w-[150px]">{p.title}</h4>
+                      <h4 className="text-sm font-bold truncate max-w-[120px] sm:max-w-[150px]">{p.title}</h4>
                       <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${getStatusColor(p.status)}`}>
                         {p.status.replace("_", " ")}
                       </span>
@@ -373,9 +373,9 @@ const MemberHome = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="lg:col-span-2 row-span-1 bg-card/40 backdrop-blur-md border border-white/10 rounded-[30px] p-6 flex items-center gap-6 group"
+            className="lg:col-span-2 bg-card/40 backdrop-blur-md border border-white/10 rounded-2xl sm:rounded-[30px] p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 group"
           >
-            <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 flex items-center justify-center flex-shrink-0 text-emerald-500">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-emerald-500/10 flex items-center justify-center flex-shrink-0 text-emerald-500">
                <Code size={32} />
             </div>
             <div className="flex-1 min-w-0">
@@ -401,7 +401,7 @@ const MemberHome = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
-            className="lg:col-span-1 row-span-1 bg-indigo-500/10 border border-indigo-500/20 rounded-[30px] p-6 flex flex-col justify-between overflow-hidden relative group"
+            className="lg:col-span-1 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl sm:rounded-[30px] p-5 sm:p-6 flex flex-col justify-between overflow-hidden relative group"
           >
              <div className="flex items-center gap-2 mb-2">
                 <div className="w-6 h-6 rounded bg-indigo-500/20 flex items-center justify-center">
@@ -423,7 +423,7 @@ const MemberHome = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7 }}
-            className="lg:col-span-1 row-span-1 bg-white/5 border border-white/10 rounded-[30px] p-6 flex flex-col justify-between group overflow-hidden"
+            className="lg:col-span-1 bg-white/5 border border-white/10 rounded-2xl sm:rounded-[30px] p-5 sm:p-6 flex flex-col justify-between group overflow-hidden"
           >
              <h4 className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-4">Toolkit</h4>
              <div className="grid grid-cols-2 gap-2">

@@ -144,7 +144,7 @@ const ProjectDetail = () => {
 
   return (
     <PageLayout>
-      <div className="container mx-auto px-4 py-10 max-w-5xl">
+      <div className="container mx-auto px-4 py-6 sm:py-10 max-w-5xl">
 
         {/* Back */}
         <button
@@ -171,7 +171,7 @@ const ProjectDetail = () => {
               </span>
             </div>
 
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">{project.title}</h1>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight mb-2">{project.title}</h1>
             <p className="text-sm text-muted-foreground flex items-center gap-1.5">
               <Users size={13} /> by <span className="font-medium text-foreground">{project.author_name || "Anonymous"}</span>
             </p>
@@ -260,7 +260,7 @@ const ProjectDetail = () => {
         {images.length > 0 && (
           <div className="mb-8 relative">
             {/* Main image */}
-            <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-accent border border-white/5">
+            <div className="relative aspect-[4/3] sm:aspect-video w-full rounded-xl sm:rounded-2xl overflow-hidden bg-accent border border-white/5">
               <AnimatePresence mode="wait">
                 <motion.img
                   key={imgIdx}

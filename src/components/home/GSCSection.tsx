@@ -12,7 +12,7 @@ const GSCSection = () => (
       </div>
 
       <div className="max-w-3xl mx-auto">
-        <div className="border border-border rounded-2xl bg-card/80 backdrop-blur-sm p-8 md:p-10 relative overflow-hidden">
+        <div className="border border-border rounded-2xl bg-card/80 backdrop-blur-sm p-5 sm:p-8 md:p-10 relative overflow-hidden">
           {/* Floating decorative Gemini sparkle */}
           <img
             src="/All logo GSA/01 (5).png"

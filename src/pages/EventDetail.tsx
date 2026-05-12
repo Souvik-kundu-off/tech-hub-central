@@ -119,13 +119,13 @@ const EventDetail = () => {
 
   return (
     <PageLayout>
-      <section className="container mx-auto px-4 py-12 max-w-3xl">
+      <section className="container mx-auto px-4 py-8 sm:py-12 max-w-3xl">
         <button onClick={() => navigate("/events")} className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 mb-6">
           <ArrowLeft size={14} /> Back to Events
         </button>
 
         {event.banner_url && (
-          <div className="aspect-[3/1] w-full rounded-xl overflow-hidden border border-border mb-6 bg-muted">
+          <div className="aspect-[2/1] sm:aspect-[3/1] w-full rounded-xl overflow-hidden border border-border mb-6 bg-muted">
             <img src={event.banner_url} alt={event.title} className="w-full h-full object-cover" />
           </div>
         )}
@@ -140,7 +140,7 @@ const EventDetail = () => {
           {event.type && <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">{event.type}</span>}
         </div>
 
-        <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">{event.title}</h1>
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight mb-3">{event.title}</h1>
         <p className="text-muted-foreground leading-relaxed mb-6">{event.description}</p>
 
         <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-8 pb-8 border-b border-border">

@@ -37,7 +37,7 @@ const MemberNavbar = () => {
             <img
               src="/Uni logo/full techclub-transparent.png"
               alt="TechClub"
-              className="h-16 w-auto transition-transform group-hover:scale-105"
+              className="h-12 sm:h-16 w-auto transition-transform group-hover:scale-105"
             />
           </Link>
 

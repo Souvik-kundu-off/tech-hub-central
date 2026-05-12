@@ -12,15 +12,15 @@ const AboutPreview = () => (
   <section className="section-padding border-t border-border relative overflow-hidden">
     {/* Floating GSA logos */}
     <img src="/All logo GSA/10 (14).png" alt="" aria-hidden="true"
-      className="absolute top-12 left-[3%] w-18 md:w-24 opacity-35 pointer-events-none select-none"
+      className="hidden sm:block absolute top-12 left-[3%] w-14 md:w-24 opacity-35 pointer-events-none select-none"
       style={{ animation: "aboutFloat 8s ease-in-out 0.5s infinite" }} />
     <img src="/All logo GSA/Google Gemini Logo on White.png" alt="" aria-hidden="true"
-      className="absolute bottom-8 right-[4%] w-20 md:w-28 opacity-30 pointer-events-none select-none"
+      className="hidden sm:block absolute bottom-8 right-[4%] w-16 md:w-28 opacity-30 pointer-events-none select-none"
       style={{ animation: "aboutFloat 10s ease-in-out 2s infinite" }} />
     <style>{`@keyframes aboutFloat { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-18px) rotate(2deg)} }`}</style>
 
     <div className="container mx-auto px-4 relative z-10">
-      <div className="grid lg:grid-cols-2 gap-16 items-start">
+      <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-start">
         <div>
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1.5">About Us</p>
           <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-5">More than just a club.</h2>

@@ -185,7 +185,7 @@ const Projects = () => {
                 >
                   {/* Cover image */}
                   {p.images?.[0] ? (
-                    <div className="w-full h-40 overflow-hidden bg-accent">
+                    <div className="w-full h-32 sm:h-40 overflow-hidden bg-accent">
                       <img
                         src={p.images[0]}
                         alt={p.title}

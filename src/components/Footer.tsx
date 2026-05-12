@@ -4,13 +4,13 @@ import { Mail } from "lucide-react";
 const Footer = () => (
   <footer className="border-t border-border bg-card/50">
     <div className="container mx-auto px-4 py-12">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
         <div className="col-span-2 md:col-span-1">
           <div className="flex items-center gap-2 mb-3">
             <img
               src="/Uni logo/full techclub-transparent.png"
               alt="TechClub"
-              className="h-25 w-auto"
+              className="h-16 sm:h-20 md:h-25 w-auto"
             />
           </div>
           <p className="text-sm text-muted-foreground leading-relaxed mb-4">

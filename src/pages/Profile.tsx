@@ -129,7 +129,7 @@ const Profile = () => {
 
   return (
     <PageLayout>
-      <div className="container mx-auto px-4 py-12 max-w-4xl">
+      <div className="container mx-auto px-4 py-8 sm:py-12 max-w-4xl">
         <div className="grid lg:grid-cols-[1fr_2fr] gap-8">
           
           {/* Left Column: Stats & Meta */}
@@ -193,7 +193,7 @@ const Profile = () => {
 
           {/* Right Column: Details & Edit */}
           <div className="space-y-6">
-            <div className="bg-card border border-border rounded-3xl p-8 shadow-sm">
+            <div className="bg-card border border-border rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-sm">
               <div className="flex items-center justify-between mb-8 border-b border-border pb-5">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
