@@ -18,28 +18,28 @@ import { ROLE_LABELS, AppRole, canRead, StaffTab } from "@/lib/permissions";
 // All possible admin sub-nav links with their required tab permission
 // adminOnly: true means the link is ONLY shown to admin/superadmin regardless of tab access
 const ALL_ADMIN_LINKS: { label: string; href: string; icon: any; tab: StaffTab; adminOnly?: boolean }[] = [
-  { label: "Overview",    href: "/admin",                icon: BarChart3,      tab: "overview" },
-  { label: "Moderation",  href: "/admin/moderation",     icon: Layout,         tab: "moderation" },
-  { label: "Events",      href: "/admin/events",          icon: Calendar,       tab: "events" },
-  { label: "Broadcasts",  href: "/admin/broadcasts",      icon: Megaphone,      tab: "broadcasts" },
-  { label: "Directory",   href: "/admin/directory",       icon: Users,          tab: "directory" },
-  { label: "Blog",        href: "/admin/blog",            icon: FileText,       tab: "blog" },
-  { label: "Resources",   href: "/admin/resources",       icon: BookOpen,       tab: "resources" },
-  { label: "Gallery",     href: "/admin/gallery",         icon: Image,          tab: "resources" },
-  { label: "Team",        href: "/admin/team",            icon: Crown,          tab: "directory" },
-  { label: "Homepage",    href: "/admin/homepage",        icon: Home,           tab: "settings", adminOnly: true },
-  { label: "Reports",     href: "/admin/reports",         icon: FileSpreadsheet,tab: "reports" },
-  { label: "Audit Log",   href: "/admin/audit-log",       icon: ScrollText,     tab: "settings" },
-  { label: "Settings",    href: "/admin/settings",        icon: Settings,       tab: "settings" },
+  { label: "Overview", href: "/admin", icon: BarChart3, tab: "overview" },
+  { label: "Moderation", href: "/admin/moderation", icon: Layout, tab: "moderation" },
+  { label: "Events", href: "/admin/events", icon: Calendar, tab: "events" },
+  { label: "Broadcasts", href: "/admin/broadcasts", icon: Megaphone, tab: "broadcasts" },
+  { label: "Directory", href: "/admin/directory", icon: Users, tab: "directory" },
+  { label: "Blog", href: "/admin/blog", icon: FileText, tab: "blog" },
+  { label: "Resources", href: "/admin/resources", icon: BookOpen, tab: "resources" },
+  { label: "Gallery", href: "/admin/gallery", icon: Image, tab: "resources" },
+  { label: "Team", href: "/admin/team", icon: Crown, tab: "directory" },
+  { label: "Homepage", href: "/admin/homepage", icon: Home, tab: "settings", adminOnly: true },
+  { label: "Reports", href: "/admin/reports", icon: FileSpreadsheet, tab: "reports" },
+  { label: "Audit Log", href: "/admin/audit-log", icon: ScrollText, tab: "settings" },
+  { label: "Settings", href: "/admin/settings", icon: Settings, tab: "settings" },
 ];
 
 // Top-level public links (always shown)
 const PUBLIC_LINKS = [
-  { label: "Projects",   href: "/projects" },
-  { label: "Events",     href: "/events" },
-  { label: "Blogs",      href: "/blog" },
+  { label: "Projects", href: "/projects" },
+  { label: "Events", href: "/events" },
+  { label: "Blogs", href: "/blog" },
   { label: "Broadcasts", href: "/broadcasts" },
-  { label: "Team",       href: "/team" },
+  { label: "Team", href: "/team" },
 ];
 
 const StaffNavbar = () => {
@@ -73,11 +73,12 @@ const StaffNavbar = () => {
         <div className="flex items-center justify-between h-16">
 
           {/* Logo */}
-          <Link to="/admin" className="flex items-center gap-3 group shrink-0">
-            <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center transition-transform group-hover:scale-110">
-              <ShieldCheck className="w-4.5 h-4.5 text-primary" />
-            </div>
-            <span className="font-bold text-lg tracking-tight">TechClub</span>
+          <Link to="/admin" className="flex items-center gap-2 group shrink-0">
+            <img
+              src="/Uni logo/full techclub-transparent.png"
+              alt="TechClub"
+              className="h-16 w-auto transition-transform group-hover:scale-105"
+            />
             <span className="hidden md:inline-flex items-center px-2 py-0.5 rounded-md bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider">
               {roleLabel}
             </span>
@@ -95,9 +96,8 @@ const StaffNavbar = () => {
                     <Link
                       key={link.href}
                       to={link.href}
-                      className={`relative flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-semibold uppercase tracking-wider transition-colors ${
-                        active ? "text-primary" : "text-muted-foreground hover:text-foreground"
-                      }`}
+                      className={`relative flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-semibold uppercase tracking-wider transition-colors ${active ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                        }`}
                     >
                       <Icon size={13} />
                       {link.label}
@@ -110,9 +110,8 @@ const StaffNavbar = () => {
                 {moreAdminLinks.length > 0 && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <button className={`relative flex items-center gap-1 px-3 py-1.5 text-[12px] font-semibold uppercase tracking-wider transition-colors ${
-                        isMoreActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
-                      }`}>
+                      <button className={`relative flex items-center gap-1 px-3 py-1.5 text-[12px] font-semibold uppercase tracking-wider transition-colors ${isMoreActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                        }`}>
                         More <ChevronDown size={12} />
                         {isMoreActive && (
                           <motion.div layoutId="admin-underline" className="absolute bottom-0 left-2 right-2 h-0.5 bg-primary rounded-full" />
@@ -147,9 +146,8 @@ const StaffNavbar = () => {
                   <Link
                     key={link.href}
                     to={link.href}
-                    className={`relative px-3 py-1.5 text-[13px] font-medium transition-colors ${
-                      location.pathname === link.href ? "text-primary" : "text-muted-foreground hover:text-foreground"
-                    }`}
+                    className={`relative px-3 py-1.5 text-[13px] font-medium transition-colors ${location.pathname === link.href ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                      }`}
                   >
                     {link.label}
                     {location.pathname === link.href && (
@@ -176,7 +174,7 @@ const StaffNavbar = () => {
                   <Avatar className="h-9 w-9 border border-primary/20">
                     <AvatarImage src={profile?.avatar_url} />
                     <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-bold">
-                      {profile?.full_name?.split(" ").map(n => n[0]).join("").toUpperCase() || <User size={14}/>}
+                      {profile?.full_name?.split(" ").map(n => n[0]).join("").toUpperCase() || <User size={14} />}
                     </AvatarFallback>
                   </Avatar>
                 </Button>
@@ -226,9 +224,8 @@ const StaffNavbar = () => {
                     key={link.href}
                     to={link.href}
                     onClick={() => setIsOpen(false)}
-                    className={`px-3 py-2.5 text-[13px] font-medium rounded-lg transition-colors ${
-                      location.pathname === link.href ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-accent"
-                    }`}
+                    className={`px-3 py-2.5 text-[13px] font-medium rounded-lg transition-colors ${location.pathname === link.href ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-accent"
+                      }`}
                   >
                     {link.label}
                   </Link>
@@ -243,9 +240,8 @@ const StaffNavbar = () => {
                       key={link.href}
                       to={link.href}
                       onClick={() => setIsOpen(false)}
-                      className={`flex items-center gap-2 px-3 py-2.5 text-[13px] font-medium rounded-lg transition-colors ${
-                        isActive(link.href) ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-accent"
-                      }`}
+                      className={`flex items-center gap-2 px-3 py-2.5 text-[13px] font-medium rounded-lg transition-colors ${isActive(link.href) ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-accent"
+                        }`}
                     >
                       <Icon size={14} /> {link.label}
                     </Link>

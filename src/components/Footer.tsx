@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Terminal, Github, Twitter, Linkedin, Instagram } from "lucide-react";
+import { Mail } from "lucide-react";
 
 const Footer = () => (
   <footer className="border-t border-border bg-card/50">
@@ -7,19 +7,19 @@ const Footer = () => (
       <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
         <div className="col-span-2 md:col-span-1">
           <div className="flex items-center gap-2 mb-3">
-            <Terminal className="w-4 h-4 text-primary" />
-            <span className="font-semibold text-sm">TechClub</span>
+            <img
+              src="/Uni logo/full techclub-transparent.png"
+              alt="TechClub"
+              className="h-25 w-auto"
+            />
           </div>
           <p className="text-sm text-muted-foreground leading-relaxed mb-4">
             Building the future, one project at a time.
           </p>
-          <div className="flex gap-2">
-            {[Github, Twitter, Linkedin, Instagram].map((Icon, i) => (
-              <a key={i} href="#" className="w-8 h-8 rounded-md border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground/20 transition-colors">
-                <Icon className="w-3.5 h-3.5" />
-              </a>
-            ))}
-          </div>
+          <a href="mailto:contact@techclub.com" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <Mail className="w-4 h-4" />
+            <span>contact@techclub.com</span>
+          </a>
         </div>
 
         {[

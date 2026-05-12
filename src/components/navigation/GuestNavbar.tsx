@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Terminal } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -21,13 +21,12 @@ const GuestNavbar = () => {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/60 backdrop-blur-xl border-b border-white/5">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center transition-transform group-hover:scale-110">
-              <Terminal className="w-4.5 h-4.5 text-primary" />
-            </div>
-            <span className="font-bold text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
-              TechClub
-            </span>
+          <Link to="/" className="flex items-center group">
+            <img
+              src="/Uni logo/full techclub-transparent.png"
+              alt="TechClub"
+              className="h-16 w-auto transition-transform group-hover:scale-105"
+            />
           </Link>
 
           {/* Desktop Links */}
@@ -36,15 +35,14 @@ const GuestNavbar = () => {
               <Link
                 key={link.label}
                 to={link.href}
-                className={`relative px-3 py-1.5 text-[13px] font-medium transition-colors ${
-                  location.pathname === link.href
-                    ? "text-primary"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
+                className={`relative px-3 py-1.5 text-[13px] font-medium transition-colors ${location.pathname === link.href
+                  ? "text-primary"
+                  : "text-muted-foreground hover:text-foreground"
+                  }`}
               >
                 {link.label}
                 {location.pathname === link.href && (
-                  <motion.div 
+                  <motion.div
                     layoutId="nav-underline"
                     className="absolute bottom-0 left-3 right-3 h-0.5 bg-primary rounded-full"
                   />
@@ -73,7 +71,7 @@ const GuestNavbar = () => {
         {/* Mobile Menu */}
         <AnimatePresence>
           {isOpen && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
@@ -85,11 +83,10 @@ const GuestNavbar = () => {
                     key={link.label}
                     to={link.href}
                     onClick={() => setIsOpen(false)}
-                    className={`px-3 py-2 text-[13px] font-medium rounded-lg transition-colors ${
-                      location.pathname === link.href
-                        ? "bg-primary/10 text-primary"
-                        : "text-muted-foreground hover:bg-accent"
-                    }`}
+                    className={`px-3 py-2 text-[13px] font-medium rounded-lg transition-colors ${location.pathname === link.href
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-accent"
+                      }`}
                   >
                     {link.label}
                   </Link>
