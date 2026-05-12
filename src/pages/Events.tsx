@@ -95,7 +95,7 @@ const Events = () => {
           ) : (
             <div className="grid md:grid-cols-2 gap-4">
               {filtered.map((event) => (
-                <div key={event.id} className="group border border-border rounded-xl overflow-hidden bg-card hover:border-foreground/20 transition-all">
+                <Link to={`/events/${event.id}`} key={event.id} className="group border border-border rounded-xl overflow-hidden bg-card hover:border-foreground/20 transition-all cursor-pointer">
                   {/* Event banner */}
                   {event.banner_url && (
                     <div className="w-full h-44 overflow-hidden bg-accent">
@@ -127,21 +127,19 @@ const Events = () => {
                   </div>
                   {event.is_upcoming && (
                     event.event_type === "outside" && event.external_url ? (
-                      <a href={event.external_url} target="_blank" rel="noreferrer">
+                      <a href={event.external_url} target="_blank" rel="noreferrer" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
                         <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 text-xs h-8 gap-1.5">
                           <ExternalLink className="w-3.5 h-3.5" /> Register Externally
                         </Button>
                       </a>
                     ) : (
-                      <Link to={`/events/${event.id}`}>
-                        <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 text-xs h-8">
-                          {event.event_type === "inside" ? "View & Register" : "View Details"}
-                        </Button>
-                      </Link>
+                      <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 text-xs h-8">
+                        {event.event_type === "inside" ? "View & Register" : "View Details"}
+                      </Button>
                     )
                   )}
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           )}
