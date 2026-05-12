@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import CloudinaryUpload from "@/components/ui/CloudinaryUpload";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -236,9 +237,16 @@ const EventManager = ({ readOnly = false }: { readOnly?: boolean }) => {
             <Field label="Spots Available">
               <Input type="number" value={form.spots} onChange={(e) => setForm({ ...form, spots: parseInt(e.target.value) || 0 })} />
             </Field>
-            <Field label="Banner Image URL">
-              <Input value={form.banner_url} onChange={(e) => setForm({ ...form, banner_url: e.target.value })} placeholder="https://..." />
-            </Field>
+            <div className="md:col-span-2">
+              <CloudinaryUpload
+                label="Event Banner"
+                folder="tech-hub/events"
+                currentUrl={form.banner_url || undefined}
+                onUpload={(url) => setForm({ ...form, banner_url: url })}
+                onClear={() => setForm({ ...form, banner_url: "" })}
+                maxSizeMB={5}
+              />
+            </div>
             {form.event_type === "outside" && (
               <Field label="External Registration Link *">
                 <Input value={form.external_url} onChange={(e) => setForm({ ...form, external_url: e.target.value })} placeholder="https://lu.ma/..." />
