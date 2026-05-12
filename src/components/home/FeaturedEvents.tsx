@@ -3,7 +3,17 @@ import { ArrowRight, Calendar, MapPin, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
-import { format } from "date-fns";
+import { format, isValid, parseISO } from "date-fns";
+
+const safeFormatDate = (dateStr: string | null | undefined) => {
+  if (!dateStr) return "TBD";
+  try {
+    const d = new Date(dateStr);
+    return isValid(d) ? format(d, "MMM dd, yyyy") : "TBD";
+  } catch {
+    return "TBD";
+  }
+};
 
 const FeaturedEvents = () => {
   const { data: events = [], isLoading } = useQuery({
@@ -71,7 +81,7 @@ const FeaturedEvents = () => {
                 <div className="flex flex-col gap-1.5 text-[13px] text-muted-foreground mb-4">
                   <span className="flex items-center gap-1.5">
                     <Calendar className="w-3.5 h-3.5" /> 
-                    {format(new Date(event.date), "MMM dd, yyyy")}
+                    {safeFormatDate(event.date)}
                   </span>
                   <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" /> {event.location}</span>
                 </div>
