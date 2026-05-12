@@ -24,7 +24,7 @@ const FeaturedEvents = () => {
         .select("*")
         .order("date", { ascending: true })
         .limit(3);
-      
+
       if (error) throw error;
       return data;
     },
@@ -63,31 +63,31 @@ const FeaturedEvents = () => {
             {events.map((event) => (
               <Link to={`/events/${event.id}`} key={event.id} className="group border border-border rounded-xl overflow-hidden hover:border-foreground/20 transition-all bg-card">
                 {/* Event banner */}
-                {event.image_url && (
+                {event.banner_url && (
                   <div className="w-full h-36 overflow-hidden bg-accent">
                     <img
-                      src={event.image_url}
+                      src={event.banner_url}
                       alt={event.title}
                       className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
                     />
                   </div>
                 )}
                 <div className="p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-[11px] font-medium uppercase tracking-wider text-primary">{event.type}</span>
-                  <span className="text-[11px] text-muted-foreground">{event.spots} spots</span>
-                </div>
-                <h3 className="font-semibold text-[15px] mb-3 group-hover:text-primary transition-colors">{event.title}</h3>
-                <div className="flex flex-col gap-1.5 text-[13px] text-muted-foreground mb-4">
-                  <span className="flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5" /> 
-                    {safeFormatDate(event.date)}
-                  </span>
-                  <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" /> {event.location}</span>
-                </div>
-                <Button variant="outline" size="sm" className="w-full text-xs h-8 border-border hover:bg-accent" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
-                  Register
-                </Button>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[11px] font-medium uppercase tracking-wider text-primary">{event.type}</span>
+                    <span className="text-[11px] text-muted-foreground">{event.spots} spots</span>
+                  </div>
+                  <h3 className="font-semibold text-[15px] mb-3 group-hover:text-primary transition-colors">{event.title}</h3>
+                  <div className="flex flex-col gap-1.5 text-[13px] text-muted-foreground mb-4">
+                    <span className="flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5" />
+                      {safeFormatDate(event.date)}
+                    </span>
+                    <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" /> {event.location}</span>
+                  </div>
+                  <Button variant="outline" size="sm" className="w-full text-xs h-8 border-border hover:bg-accent" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+                    Register
+                  </Button>
                 </div>
               </Link>
             ))}

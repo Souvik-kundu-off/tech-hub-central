@@ -95,7 +95,18 @@ const Events = () => {
           ) : (
             <div className="grid md:grid-cols-2 gap-4">
               {filtered.map((event) => (
-                <div key={event.id} className="border border-border rounded-lg p-6 bg-card hover:border-foreground/20 transition-colors">
+                <div key={event.id} className="group border border-border rounded-xl overflow-hidden bg-card hover:border-foreground/20 transition-all">
+                  {/* Event banner */}
+                  {event.banner_url && (
+                    <div className="w-full h-44 overflow-hidden bg-accent">
+                      <img
+                        src={event.banner_url}
+                        alt={event.title}
+                        className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+                      />
+                    </div>
+                  )}
+                  <div className="p-6">
                   <div className="flex items-center gap-2 mb-3 flex-wrap">
                     <span className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${
                       event.event_type === "inside" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
@@ -110,7 +121,7 @@ const Events = () => {
                   <h3 className="font-semibold text-lg mb-2">{event.title}</h3>
                   <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{event.description}</p>
                   <div className="flex flex-wrap gap-4 text-[13px] text-muted-foreground mb-4">
-                    {event.date && <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> {event.date}</span>}
+                    <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> {event.date || "To be discussed"}</span>
                     {event.location && <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" /> {event.location}</span>}
                     {event.spots != null && <span className="flex items-center gap-1.5"><Users className="w-3.5 h-3.5" /> {event.spots} spots</span>}
                   </div>
@@ -129,6 +140,7 @@ const Events = () => {
                       </Link>
                     )
                   )}
+                  </div>
                 </div>
               ))}
             </div>
