@@ -51,7 +51,18 @@ const FeaturedEvents = () => {
         ) : (
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
             {events.map((event) => (
-              <div key={event.id} className="group border border-border rounded-lg p-5 hover:border-foreground/20 transition-colors bg-card">
+              <Link to={`/events/${event.id}`} key={event.id} className="group border border-border rounded-xl overflow-hidden hover:border-foreground/20 transition-all bg-card">
+                {/* Event banner */}
+                {event.image_url && (
+                  <div className="w-full h-36 overflow-hidden bg-accent">
+                    <img
+                      src={event.image_url}
+                      alt={event.title}
+                      className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+                    />
+                  </div>
+                )}
+                <div className="p-5">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-[11px] font-medium uppercase tracking-wider text-primary">{event.type}</span>
                   <span className="text-[11px] text-muted-foreground">{event.spots} spots</span>
@@ -64,10 +75,11 @@ const FeaturedEvents = () => {
                   </span>
                   <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" /> {event.location}</span>
                 </div>
-                <Button variant="outline" size="sm" className="w-full text-xs h-8 border-border hover:bg-accent">
+                <Button variant="outline" size="sm" className="w-full text-xs h-8 border-border hover:bg-accent" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
                   Register
                 </Button>
-              </div>
+                </div>
+              </Link>
             ))}
           </div>
         )}

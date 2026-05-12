@@ -41,22 +41,30 @@ const CTASection = () => {
       <style>{`@keyframes ctaFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }`}</style>
 
       <div className="container mx-auto px-4 relative z-10">
-        <div className="border border-border rounded-xl p-6 sm:p-10 md:p-16 text-center bg-card">
-          <h2 className="text-2xl md:text-4xl font-bold tracking-tight mb-4">{content.cta_headline}</h2>
-          <p className="text-muted-foreground text-[15px] max-w-md mx-auto mb-8">
-            {content.cta_subtext}
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link to="/signup">
-              <Button className="bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-6 text-sm">
-                Get Started <ArrowRight className="w-4 h-4 ml-1.5" />
-              </Button>
-            </Link>
-            <Link to="/contact">
-              <Button variant="outline" className="h-10 px-6 text-sm border-border hover:bg-accent">
-                Contact Us
-              </Button>
-            </Link>
+        {/* Subtle glow behind */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
+
+        <div className="relative border border-border rounded-xl p-6 sm:p-10 md:p-16 text-center bg-card overflow-hidden">
+          {/* Inner gradient accent */}
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.03] via-transparent to-primary/[0.02] pointer-events-none" />
+
+          <div className="relative z-10">
+            <h2 className="text-2xl md:text-4xl font-bold tracking-tight mb-4">{content.cta_headline}</h2>
+            <p className="text-muted-foreground text-[15px] max-w-md mx-auto mb-8">
+              {content.cta_subtext}
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Link to="/signup">
+                <Button className="bg-primary text-primary-foreground hover:bg-primary/90 h-11 px-8 text-sm font-semibold rounded-lg shadow-lg shadow-primary/20">
+                  Get Started <ArrowRight className="w-4 h-4 ml-1.5" />
+                </Button>
+              </Link>
+              <Link to="/contact">
+                <Button variant="outline" className="h-11 px-8 text-sm border-border hover:bg-accent rounded-lg">
+                  Contact Us
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </div>

@@ -50,9 +50,23 @@ const FeaturedProjects = () => {
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {projects.map((p) => (
-              <div key={p.id} className="group border border-border rounded-lg p-5 hover:border-foreground/20 transition-colors bg-card flex flex-col">
+              <Link key={p.id} to={`/projects/${p.id}`} className="group border border-border rounded-xl overflow-hidden hover:border-foreground/20 transition-all bg-card flex flex-col">
+                {/* Cover image */}
+                {p.images?.[0] && (
+                  <div className="w-full h-40 overflow-hidden bg-accent">
+                    <img
+                      src={p.images[0]}
+                      alt={p.title}
+                      className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+                    />
+                  </div>
+                )}
+                <div className="p-5 flex flex-col flex-1">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[11px] font-medium uppercase tracking-wider text-primary">{p.category || "Project"}</span>
+                  {p.status === "approved" && (
+                    <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400">Live</span>
+                  )}
                 </div>
                 <h3 className="font-semibold text-[15px] mb-1.5 group-hover:text-primary transition-colors">{p.title}</h3>
                 <p className="text-[13px] text-muted-foreground leading-relaxed mb-4 flex-1">{p.description}</p>
@@ -62,13 +76,14 @@ const FeaturedProjects = () => {
                   ))}
                 </div>
                 <div className="flex items-center justify-between pt-3 border-t border-border">
-                  <span className="text-xs text-muted-foreground">Club Member</span>
+                  <span className="text-xs text-muted-foreground">{p.author_name || "Club Member"}</span>
                   <div className="flex gap-2">
-                    {p.github_url && <a href={ensureUrl(p.github_url)} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors"><Github className="w-3.5 h-3.5" /></a>}
-                    {p.live_url && <a href={ensureUrl(p.live_url)} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors"><ExternalLink className="w-3.5 h-3.5" /></a>}
+                    {p.github_url && <a href={ensureUrl(p.github_url)} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-muted-foreground hover:text-foreground transition-colors"><Github className="w-3.5 h-3.5" /></a>}
+                    {p.live_url && <a href={ensureUrl(p.live_url)} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-muted-foreground hover:text-foreground transition-colors"><ExternalLink className="w-3.5 h-3.5" /></a>}
                   </div>
                 </div>
-              </div>
+                </div>
+              </Link>
             ))}
           </div>
         )}

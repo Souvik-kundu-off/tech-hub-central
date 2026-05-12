@@ -56,7 +56,7 @@ const Footer = () => (
       </div>
       <div className="border-t border-border mt-6 pt-6 flex flex-col sm:flex-row justify-between items-center gap-2">
         <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} TechClub. All rights reserved.</p>
-        <p className="text-xs text-muted-foreground">Built by club members with ❤️</p>
+        <p className="text-xs text-muted-foreground">Built by students. Powered by ideas.</p>
       </div>
     </div>
   </footer>

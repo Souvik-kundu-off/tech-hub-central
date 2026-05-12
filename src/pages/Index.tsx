@@ -42,9 +42,9 @@ const Index = () => {
       ) : (
         <>
           <HeroSection />
-          <FeaturedEvents />
           <AboutPreview />
           <FeaturedProjects />
+          <FeaturedEvents />
           <SponsorsSection />
           <GSCSection />
           <CTASection />
