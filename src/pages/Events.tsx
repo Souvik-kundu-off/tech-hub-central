@@ -127,11 +127,11 @@ const Events = () => {
                   </div>
                   {event.is_upcoming && (
                     event.event_type === "outside" && event.external_url ? (
-                      <a href={event.external_url} target="_blank" rel="noreferrer" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+                      <span onClick={(e: React.MouseEvent) => { e.preventDefault(); e.stopPropagation(); window.open(event.external_url, "_blank"); }}>
                         <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 text-xs h-8 gap-1.5">
                           <ExternalLink className="w-3.5 h-3.5" /> Register Externally
                         </Button>
-                      </a>
+                      </span>
                     ) : (
                       <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 text-xs h-8">
                         {event.event_type === "inside" ? "View & Register" : "View Details"}

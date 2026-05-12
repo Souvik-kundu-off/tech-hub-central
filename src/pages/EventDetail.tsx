@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import {
   Calendar, MapPin, Users, ExternalLink, Loader2, ArrowLeft, CheckCircle2, Globe, Layers,
+  Phone, Mail, UserCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -24,12 +25,18 @@ interface FormField {
   options?: string[];
 }
 
+interface Coordinator {
+  name: string;
+  phone: string;
+  email: string;
+}
+
 interface EventRow {
   id: string; title: string; description: string | null;
   date: string | null; location: string | null; type: string | null;
   spots: number | null; mode: string | null; banner_url: string | null;
   external_url: string | null; event_type: "inside" | "outside" | null;
-  form_schema: FormField[] | null; is_upcoming: boolean;
+  form_schema: FormField[] | null; coordinators: Coordinator[] | null; is_upcoming: boolean;
 }
 
 const EventDetail = () => {
@@ -257,6 +264,32 @@ const EventDetail = () => {
                     </Button>
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Coordinators */}
+            {event.coordinators && event.coordinators.length > 0 && (
+              <div className="border border-border rounded-xl p-5 bg-card mt-6">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4 flex items-center gap-2">
+                  <UserCircle size={14} className="text-primary" /> Event Coordinators
+                </h3>
+                <div className="space-y-3">
+                  {event.coordinators.map((c, idx) => (
+                    <div key={idx} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 p-3 rounded-lg bg-muted/40">
+                      <span className="font-medium text-sm">{c.name}</span>
+                      {c.phone && (
+                        <a href={`tel:${c.phone}`} className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors">
+                          <Phone size={12} /> {c.phone}
+                        </a>
+                      )}
+                      {c.email && (
+                        <a href={`mailto:${c.email}`} className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors">
+                          <Mail size={12} /> {c.email}
+                        </a>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>

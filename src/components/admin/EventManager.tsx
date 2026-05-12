@@ -12,7 +12,7 @@ import {
 import { toast } from "sonner";
 import {
   Calendar, Plus, Trash2, Edit3, Loader2, MapPin, Users, X, ExternalLink,
-  GripVertical, ListChecks, Globe, Layers,
+  GripVertical, ListChecks, Globe, Layers, Phone, Mail, UserCircle,
 } from "lucide-react";
 
 type FieldType = "short_text" | "long_text" | "email" | "number" | "single_select" | "multi_select" | "checkbox";
@@ -23,6 +23,12 @@ interface FormField {
   label: string;
   required: boolean;
   options?: string[]; // for select-type fields
+}
+
+interface Coordinator {
+  name: string;
+  phone: string;
+  email: string;
 }
 
 interface EventRow {
@@ -39,6 +45,7 @@ interface EventRow {
   external_url: string | null;
   event_type: "inside" | "outside" | null;
   form_schema: FormField[] | null;
+  coordinators: Coordinator[] | null;
   is_upcoming: boolean;
   created_at: string;
 }
@@ -49,6 +56,7 @@ const empty = {
   banner_url: "", register_url: "", external_url: "",
   event_type: "outside" as "inside" | "outside",
   form_schema: [] as FormField[],
+  coordinators: [] as Coordinator[],
   is_upcoming: true,
 };
 
@@ -96,6 +104,7 @@ const EventManager = ({ readOnly = false }: { readOnly?: boolean }) => {
       register_url: e.register_url || "", external_url: e.external_url || "",
       event_type: (e.event_type as any) || "outside",
       form_schema: Array.isArray(e.form_schema) ? e.form_schema : [],
+      coordinators: Array.isArray(e.coordinators) ? e.coordinators : [],
       is_upcoming: e.is_upcoming,
     });
   };
@@ -257,6 +266,84 @@ const EventManager = ({ readOnly = false }: { readOnly?: boolean }) => {
           <Field label="Description">
             <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="min-h-[100px]" />
           </Field>
+
+          {/* Coordinators */}
+          <div className="border border-border rounded-lg p-4 bg-muted/30 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <UserCircle size={16} className="text-primary" />
+                <h4 className="font-semibold text-sm">Event Coordinators</h4>
+                <span className="text-[10px] text-muted-foreground">(max 3)</span>
+              </div>
+              {form.coordinators.length < 3 && (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setForm({ ...form, coordinators: [...form.coordinators, { name: "", phone: "", email: "" }] })}
+                  className="gap-1.5 h-8"
+                >
+                  <Plus size={14} /> Add
+                </Button>
+              )}
+            </div>
+
+            {form.coordinators.length === 0 ? (
+              <p className="text-xs text-muted-foreground py-4 text-center">
+                No coordinators added yet. Add contact persons for this event.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {form.coordinators.map((c, idx) => (
+                  <div key={idx} className="border border-border rounded-lg p-3 bg-card space-y-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Coordinator {idx + 1}</span>
+                      <button
+                        type="button"
+                        onClick={() => setForm({ ...form, coordinators: form.coordinators.filter((_, i) => i !== idx) })}
+                        className="text-muted-foreground hover:text-destructive p-1"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                    <div className="grid sm:grid-cols-3 gap-2">
+                      <Input
+                        value={c.name}
+                        onChange={(e) => {
+                          const updated = [...form.coordinators];
+                          updated[idx] = { ...updated[idx], name: e.target.value };
+                          setForm({ ...form, coordinators: updated });
+                        }}
+                        placeholder="Name"
+                        className="h-9"
+                      />
+                      <Input
+                        value={c.phone}
+                        onChange={(e) => {
+                          const updated = [...form.coordinators];
+                          updated[idx] = { ...updated[idx], phone: e.target.value };
+                          setForm({ ...form, coordinators: updated });
+                        }}
+                        placeholder="Phone number"
+                        className="h-9"
+                      />
+                      <Input
+                        type="email"
+                        value={c.email}
+                        onChange={(e) => {
+                          const updated = [...form.coordinators];
+                          updated[idx] = { ...updated[idx], email: e.target.value };
+                          setForm({ ...form, coordinators: updated });
+                        }}
+                        placeholder="Email"
+                        className="h-9"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* INSIDE event: form builder */}
           {form.event_type === "inside" && (
