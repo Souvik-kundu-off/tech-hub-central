@@ -41,6 +41,43 @@ const HeroSection = () => {
       {/* Radial fade */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,hsl(var(--background))_70%)]" />
 
+      {/* Floating GSA logos */}
+      <img
+        src="/All logo GSA/element.webp"
+        alt=""
+        aria-hidden="true"
+        className="absolute top-24 left-[8%] w-16 md:w-24 opacity-15 pointer-events-none select-none"
+        style={{ animation: "heroFloat 6s ease-in-out infinite" }}
+      />
+      <img
+        src="/All logo GSA/01 (5).png"
+        alt=""
+        aria-hidden="true"
+        className="absolute top-32 right-[6%] w-14 md:w-20 opacity-15 pointer-events-none select-none"
+        style={{ animation: "heroFloat 8s ease-in-out 1s infinite" }}
+      />
+      <img
+        src="/All logo GSA/element.webp"
+        alt=""
+        aria-hidden="true"
+        className="absolute bottom-28 left-[12%] w-10 md:w-16 opacity-10 pointer-events-none select-none rotate-45"
+        style={{ animation: "heroFloat 7s ease-in-out 2s infinite" }}
+      />
+      <img
+        src="/All logo GSA/01 (5).png"
+        alt=""
+        aria-hidden="true"
+        className="absolute bottom-36 right-[10%] w-12 md:w-16 opacity-10 pointer-events-none select-none"
+        style={{ animation: "heroFloat 9s ease-in-out 0.5s infinite" }}
+      />
+
+      <style>{`
+        @keyframes heroFloat {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-20px) rotate(3deg); }
+        }
+      `}</style>
+
       <div className="container mx-auto px-4 relative z-10 text-center">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border text-xs text-muted-foreground mb-8 animate-fade-up">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />

@@ -6,6 +6,7 @@ import FeaturedEvents from "@/components/home/FeaturedEvents";
 import AboutPreview from "@/components/home/AboutPreview";
 import FeaturedProjects from "@/components/home/FeaturedProjects";
 import SponsorsSection from "@/components/home/SponsorsSection";
+import GSCSection from "@/components/home/GSCSection";
 import CTASection from "@/components/home/CTASection";
 import Footer from "@/components/Footer";
 import { useNavigate } from "react-router-dom";
@@ -45,6 +46,7 @@ const Index = () => {
           <AboutPreview />
           <FeaturedProjects />
           <SponsorsSection />
+          <GSCSection />
           <CTASection />
         </>
       )}

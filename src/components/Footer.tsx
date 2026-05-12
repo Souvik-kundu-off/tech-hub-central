@@ -39,7 +39,22 @@ const Footer = () => (
           </div>
         ))}
       </div>
-      <div className="border-t border-border mt-10 pt-6 flex flex-col sm:flex-row justify-between items-center gap-2">
+      <div className="border-t border-border mt-8 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <img
+            src="/All logo GSA/Google Logo.png"
+            alt="Google"
+            className="h-6 w-auto opacity-60"
+          />
+          <span className="text-xs text-muted-foreground">Google Student Community</span>
+        </div>
+        <img
+          src="/All logo GSA/Gemini Sparkle.png"
+          alt="#TeamGemini"
+          className="h-5 w-auto opacity-50"
+        />
+      </div>
+      <div className="border-t border-border mt-6 pt-6 flex flex-col sm:flex-row justify-between items-center gap-2">
         <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} TechClub. All rights reserved.</p>
         <p className="text-xs text-muted-foreground">Built by club members with ❤️</p>
       </div>
