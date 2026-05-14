@@ -96,7 +96,51 @@ const AdminReview = () => {
     if (error) {
       toast.error(`Failed to update project: ${error.message}`);
     } else {
-      toast.success(`Project ${status} successfully!`);
+      if (status === 'approved') {
+        const project = projects.find(p => p.id === projectId);
+        if (project) {
+          // Check if points were already awarded for this project to prevent double-awarding
+          const descPrefix = `Project Approval: ${project.title}`;
+          const { data: existingPoints } = await supabase
+            .from("points_history")
+            .select("id")
+            .eq("user_id", project.author_id)
+            .ilike("description", `${descPrefix}%`)
+            .maybeSingle();
+
+          if (!existingPoints) {
+            const pointsToAward = 50;
+            
+            // Get current points
+            const { data: profile } = await supabase
+              .from("profiles")
+              .select("points")
+              .eq("id", project.author_id)
+              .single();
+              
+            const currentPoints = profile?.points || 0;
+
+            // Award points
+            await supabase
+              .from("profiles")
+              .update({ points: currentPoints + pointsToAward })
+              .eq("id", project.author_id);
+
+            // Log history with a unique identifier
+            await supabase.from("points_history").insert([{
+              user_id: project.author_id,
+              amount: pointsToAward,
+              description: `${descPrefix} (${project.id.split('-')[0]})`
+            }]);
+
+            toast.success(`Project approved! +${pointsToAward} points awarded to ${project.author_name}.`);
+          } else {
+            toast.success(`Project approved! (Points were already awarded previously)`);
+          }
+        }
+      } else {
+        toast.success(`Project ${status.replace("_", " ")} successfully!`);
+      }
       fetchProjects();
     }
     setProcessing(null);

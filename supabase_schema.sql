@@ -555,3 +555,38 @@ CREATE POLICY "Admins manage points" ON public.points_history FOR ALL
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['superadmin','admin']::public.app_role[]));
 CREATE POLICY "Faculty read points" ON public.points_history FOR SELECT
   USING (public.has_role(auth.uid(), 'faculty'::public.app_role));
+
+-- =============================================================
+-- 14. TEAM MEMBERS (Public team page)
+-- =============================================================
+CREATE TABLE IF NOT EXISTS public.team_members (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  profile_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
+  full_name TEXT NOT NULL,
+  role TEXT,
+  department TEXT,
+  avatar_url TEXT,
+  github_url TEXT,
+  linkedin_url TEXT,
+  twitter_url TEXT,
+  is_faculty BOOLEAN DEFAULT FALSE,
+  sort_order INTEGER DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+);
+
+-- Resilience: Add profile_id if table already exists without it
+ALTER TABLE public.team_members ADD COLUMN IF NOT EXISTS profile_id UUID REFERENCES profiles(id) ON DELETE SET NULL;
+
+ALTER TABLE public.team_members ENABLE ROW LEVEL SECURITY;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Team members viewable by everyone.') THEN
+        CREATE POLICY "Team members viewable by everyone." ON public.team_members FOR SELECT USING (true);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Staff manage team members.') THEN
+        CREATE POLICY "Staff manage team members." ON public.team_members FOR ALL
+          USING (public.has_any_role(auth.uid(), ARRAY['superadmin','admin']::public.app_role[]))
+          WITH CHECK (public.has_any_role(auth.uid(), ARRAY['superadmin','admin']::public.app_role[]));
+    END IF;
+END $$;
