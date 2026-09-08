@@ -70,11 +70,11 @@
 
 @layer utilities {
   .section-padding {
-    @apply py-12 sm:py-16 md:py-20 lg:py-28;
+    @apply py-8 sm:py-10 md:py-12;
   }
 
   .section-header {
-    @apply text-center mb-8 sm:mb-10 md:mb-14;
+    @apply text-center mb-6 sm:mb-8;
   }
 
   .text-gradient {

@@ -15,6 +15,8 @@ import Blog from "./pages/Blog";
 import Broadcasts from "./pages/Broadcasts";
 import Gallery from "./pages/Gallery";
 import Contact from "./pages/Contact";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
 import Leaderboard from "./pages/Leaderboard";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -67,6 +69,8 @@ const App = () => (
               <Route path="/broadcasts" element={<Broadcasts />} />
               <Route path="/gallery" element={<Gallery />} />
               <Route path="/contact" element={<Contact />} />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
+              <Route path="/terms" element={<TermsOfService />} />
               <Route path="/leaderboard" element={<Leaderboard />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />

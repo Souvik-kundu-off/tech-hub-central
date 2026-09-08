@@ -107,19 +107,12 @@ const HeroSection = () => {
           </Link>
         </div>
 
-        {/* Minimal stats strip */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8 md:gap-12 mt-12 sm:mt-16 md:mt-20 animate-fade-up animate-fade-up-delay-3 max-w-md sm:max-w-none mx-auto">
-          {[
-            { value: content.stat_members, label: "Members" },
-            { value: content.stat_events, label: "Events" },
-            { value: content.stat_projects, label: "Projects" },
-            { value: content.stat_wins, label: "Wins" },
-          ].map((s, i) => (
-            <div key={i} className="text-center">
-              <p className="text-xl sm:text-2xl font-bold tracking-tight">{s.value}</p>
-              <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">{s.label}</p>
-            </div>
-          ))}
+        {/* Pilot launch notice */}
+        <div className="mt-12 sm:mt-16 animate-fade-up animate-fade-up-delay-3">
+          <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full border border-border/80 bg-card/80 backdrop-blur-sm text-xs sm:text-sm text-muted-foreground shadow-sm">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+            <span>Just launched for the CSE-AI department — be one of the first members to join & submit projects.</span>
+          </div>
         </div>
       </div>
     </section>

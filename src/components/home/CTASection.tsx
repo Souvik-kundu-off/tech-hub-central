@@ -5,8 +5,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 const DEFAULTS: Record<string, string> = {
-  cta_headline: "Ready to build something great?",
-  cta_subtext: "Join 200+ students shipping real projects. No experience required — just curiosity.",
+  cta_headline: "Join the CSE-AI Student Hub",
+  cta_subtext: "Submit your projects, discover upcoming department events, and collaborate with your CSE-AI peers.",
 };
 
 const CTASection = () => {

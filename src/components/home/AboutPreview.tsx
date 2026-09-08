@@ -2,10 +2,26 @@ import { Link } from "react-router-dom";
 import { ArrowRight, BookOpen, Code, Users, Trophy } from "lucide-react";
 
 const pillars = [
-  { icon: BookOpen, title: "Learn", desc: "Workshops, bootcamps, and mentorship from industry professionals." },
-  { icon: Code, title: "Build", desc: "Real-world projects, hackathons, and open-source contributions." },
-  { icon: Users, title: "Connect", desc: "Network with peers, alumni, and tech industry leaders." },
-  { icon: Trophy, title: "Compete", desc: "Coding contests, tech quizzes, and national-level competitions." },
+  { 
+    icon: BookOpen, 
+    title: "Learn", 
+    desc: "Hands-on tech workshops on AI, web development, and cloud tools designed for CSE-AI coursework and projects." 
+  },
+  { 
+    icon: Code, 
+    title: "Build", 
+    desc: "Student project showcases, collaborative repositories, and hackathons tailored for department members." 
+  },
+  { 
+    icon: Users, 
+    title: "Connect", 
+    desc: "Peer networks across CSE-AI batches, mentor access, and direct collaboration on real-world ideas." 
+  },
+  { 
+    icon: Trophy, 
+    title: "Compete", 
+    desc: "Internal coding challenges, department leaderboards, and support for participating in national hackathons." 
+  },
 ];
 
 const AboutPreview = () => (
@@ -23,12 +39,12 @@ const AboutPreview = () => (
       <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-start">
         <div>
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1.5">About Us</p>
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-5">More than just a club.</h2>
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-5">Departmental Innovation & Learning</h2>
           <p className="text-muted-foreground text-[15px] leading-relaxed mb-4">
-            We're a student-run tech community bridging classroom learning and industry skills. From beginner-friendly workshops to national hackathons, there's a place for everyone.
+            The CSE-AI Student Hub is a student-led initiative created specifically for Computer Science & Engineering (AI) students to bridge academic learning with practical project development.
           </p>
           <p className="text-muted-foreground text-[15px] leading-relaxed mb-6">
-            Founded in 2020, we've grown from 15 members to 200+ passionate technologists who've shipped real products, won competitions, and landed dream roles.
+            Whether you are building your first web app, experimenting with machine learning models, or preparing for technical competitions, the Hub provides the platform and community to support your work.
           </p>
           <Link to="/about" className="text-sm text-primary hover:underline inline-flex items-center gap-1">
             Learn more <ArrowRight className="w-3.5 h-3.5" />

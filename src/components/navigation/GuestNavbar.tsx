@@ -20,6 +20,8 @@ const GuestNavbar = () => {
     { label: "About", href: "/about" },
     { label: "Projects", href: "/projects" },
     { label: "Events", href: "/events" },
+    { label: "Resources", href: "/resources" },
+    { label: "Blog", href: "/blog" },
     { label: "Gallery", href: "/gallery" },
     { label: "Team", href: "/team" },
     { label: "Contact", href: "/contact" },
@@ -33,11 +35,11 @@ const GuestNavbar = () => {
     }`}>
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center group">
+          <Link to="/" className="flex items-center group py-1">
             <img
               src="/Uni logo/CSE_AI_WHITE_LOGO_FULL.png"
               alt="CSE-AI Student Hub"
-              className="h-10 sm:h-12 md:h-14 w-auto transition-transform group-hover:scale-105"
+              className="h-12 sm:h-14 md:h-16 lg:h-18 max-h-16 w-auto object-contain transition-transform group-hover:scale-105"
             />
           </Link>
 

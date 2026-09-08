@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { format, isValid, parseISO } from "date-fns";
+import EmptyState from "@/components/ui/EmptyState";
 
 const safeFormatDate = (dateStr: string | null | undefined) => {
   if (!dateStr) return "TBD";
@@ -57,7 +58,11 @@ const FeaturedEvents = () => {
             <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
           </div>
         ) : events.length === 0 ? (
-          <p className="text-muted-foreground text-sm py-10 text-center">No upcoming events found.</p>
+          <EmptyState
+            icon={Calendar}
+            title="No upcoming events scheduled"
+            description="Department workshops, study jams, and hackathons will appear here as schedules are announced."
+          />
         ) : (
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
             {events.map((event) => (

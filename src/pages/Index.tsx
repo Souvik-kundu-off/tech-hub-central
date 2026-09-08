@@ -5,7 +5,6 @@ import MemberHome from "@/components/home/MemberHome";
 import FeaturedEvents from "@/components/home/FeaturedEvents";
 import AboutPreview from "@/components/home/AboutPreview";
 import FeaturedProjects from "@/components/home/FeaturedProjects";
-import SponsorsSection from "@/components/home/SponsorsSection";
 import GSCSection from "@/components/home/GSCSection";
 import CTASection from "@/components/home/CTASection";
 import Footer from "@/components/Footer";
@@ -45,7 +44,6 @@ const Index = () => {
           <AboutPreview />
           <FeaturedProjects />
           <FeaturedEvents />
-          <SponsorsSection />
           <GSCSection />
           <CTASection />
         </>

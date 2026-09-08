@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, ExternalLink, Github, Loader2 } from "lucide-react";
+import { ArrowRight, ExternalLink, Github, Loader2, FolderOpen } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { ensureUrl } from "@/lib/utils-url";
+import EmptyState from "@/components/ui/EmptyState";
 
 const FeaturedProjects = () => {
   const { data: projects = [], isLoading } = useQuery({
@@ -46,7 +47,16 @@ const FeaturedProjects = () => {
             <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
           </div>
         ) : projects.length === 0 ? (
-          <p className="text-muted-foreground text-sm py-10 text-center">No projects found.</p>
+          <EmptyState
+            icon={FolderOpen}
+            title="No featured projects yet"
+            description="Projects will appear here once students start submitting — be the first to showcase your build."
+            action={
+              <Link to="/submit-project">
+                <span className="text-xs text-primary hover:underline font-medium">Submit a project &rarr;</span>
+              </Link>
+            }
+          />
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {projects.map((p) => (

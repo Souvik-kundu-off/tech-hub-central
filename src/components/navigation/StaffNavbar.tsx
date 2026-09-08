@@ -37,7 +37,8 @@ const ALL_ADMIN_LINKS: { label: string; href: string; icon: any; tab: StaffTab; 
 const PUBLIC_LINKS = [
   { label: "Projects", href: "/projects" },
   { label: "Events", href: "/events" },
-  { label: "Blogs", href: "/blog" },
+  { label: "Resources", href: "/resources" },
+  { label: "Blog", href: "/blog" },
   { label: "Broadcasts", href: "/broadcasts" },
   { label: "Team", href: "/team" },
 ];
@@ -73,13 +74,13 @@ const StaffNavbar = () => {
         <div className="flex items-center justify-between h-16">
 
           {/* Logo */}
-          <Link to="/admin" className="flex items-center gap-2 group shrink-0">
+          <Link to="/admin" className="flex items-center gap-2.5 group shrink-0 py-1">
             <img
               src="/Uni logo/CSE_AI_WHITE_LOGO_FULL.png"
               alt="CSE-AI Student Hub"
-              className="h-10 sm:h-12 md:h-14 w-auto transition-transform group-hover:scale-105"
+              className="h-12 sm:h-14 md:h-16 lg:h-18 max-h-16 w-auto object-contain transition-transform group-hover:scale-105"
             />
-            <span className="hidden md:inline-flex items-center px-2 py-0.5 rounded-md bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider">
+            <span className="hidden md:inline-flex items-center px-2 py-0.5 rounded-md bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider ml-1">
               {roleLabel}
             </span>
           </Link>

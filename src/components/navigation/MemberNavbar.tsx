@@ -23,7 +23,7 @@ const MemberNavbar = () => {
     { label: "Dashboard", href: "/dashboard" },
     { label: "Projects", href: "/projects" },
     { label: "Events", href: "/events" },
-    { label: "Blogs", href: "/blog" },
+    { label: "Blog", href: "/blog" },
     { label: "Broadcasts", href: "/broadcasts" },
     { label: "Resources", href: "/resources" },
     { label: "Leaderboard", href: "/leaderboard" },
@@ -33,11 +33,11 @@ const MemberNavbar = () => {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/60 backdrop-blur-xl border-b border-white/5">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <Link to="/dashboard" className="flex items-center group">
+          <Link to="/dashboard" className="flex items-center group py-1">
             <img
               src="/Uni logo/CSE_AI_WHITE_LOGO_FULL.png"
               alt="CSE-AI Student Hub"
-              className="h-10 sm:h-12 md:h-14 w-auto transition-transform group-hover:scale-105"
+              className="h-12 sm:h-14 md:h-16 lg:h-18 max-h-16 w-auto object-contain transition-transform group-hover:scale-105"
             />
           </Link>
 

@@ -2,6 +2,7 @@ import PageLayout from "@/components/PageLayout";
 import { Image as ImageIcon, Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
+import EmptyState from "@/components/ui/EmptyState";
 
 interface GalleryItem {
   id: string;
@@ -32,32 +33,36 @@ const Gallery = () => {
 
   return (
     <PageLayout>
-      <section className="section-padding border-b border-border">
+      <section className="py-8 sm:py-10 border-b border-border">
         <div className="container mx-auto px-4 text-center">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1.5">Gallery</p>
-          <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">Moments captured.</h1>
-          <p className="text-muted-foreground text-[15px] max-w-md mx-auto">
-            Photos and highlights from our events, workshops, and hangouts.
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1">Gallery</p>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight mb-2">Moments captured.</h1>
+          <p className="text-muted-foreground text-xs sm:text-sm max-w-md mx-auto">
+            Photos and highlights from department events, workshops, and student activities.
           </p>
         </div>
       </section>
 
-      <section className="section-padding">
+      <section className="py-6 sm:py-8">
         <div className="container mx-auto px-4">
           {isLoading ? (
-            <div className="flex justify-center py-20">
+            <div className="flex justify-center py-12">
               <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
             </div>
           ) : items.length === 0 ? (
-            <p className="text-muted-foreground text-sm py-20 text-center">No gallery images yet.</p>
+            <EmptyState
+              icon={ImageIcon}
+              title="No gallery photos uploaded"
+              description="Photos from workshops, events, and department activities will be displayed here."
+            />
           ) : (
-            <div className="space-y-12">
+            <div className="space-y-10">
               {albums.map(album => {
                 const albumItems = items.filter(i => i.album === album);
                 return (
                   <div key={album}>
-                    <h2 className="text-lg font-bold mb-4">{album} <span className="text-xs text-muted-foreground font-normal ml-1">{albumItems.length} photos</span></h2>
-                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <h2 className="text-base font-bold mb-3">{album} <span className="text-xs text-muted-foreground font-normal ml-1">{albumItems.length} photos</span></h2>
+                    <div className="flex flex-wrap justify-center gap-4">
                       {albumItems.map(g => (
                         <GalleryCard key={g.id} item={g} />
                       ))}
@@ -67,8 +72,8 @@ const Gallery = () => {
               })}
               {ungrouped.length > 0 && (
                 <div>
-                  {albums.length > 0 && <h2 className="text-lg font-bold mb-4">Other</h2>}
-                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {albums.length > 0 && <h2 className="text-base font-bold mb-3">Other</h2>}
+                  <div className="flex flex-wrap justify-center gap-4">
                     {ungrouped.map(g => (
                       <GalleryCard key={g.id} item={g} />
                     ))}
@@ -84,7 +89,7 @@ const Gallery = () => {
 };
 
 const GalleryCard = ({ item }: { item: GalleryItem }) => (
-  <div className="group border border-border rounded-lg overflow-hidden bg-card hover:border-foreground/20 transition-colors cursor-pointer">
+  <div className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.67rem)] max-w-sm group border border-border rounded-lg overflow-hidden bg-card hover:border-foreground/20 transition-colors cursor-pointer">
     <div className="aspect-video relative overflow-hidden">
       <img
         src={item.image_url}
