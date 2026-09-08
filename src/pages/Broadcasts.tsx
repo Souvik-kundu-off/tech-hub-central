@@ -42,7 +42,7 @@ const Broadcasts = () => {
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1.5">Broadcasts</p>
           <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">Announcements & alerts.</h1>
           <p className="text-muted-foreground text-[15px] max-w-md mx-auto">
-            All the latest updates from the TechClub team in one place.
+            All the latest updates from the CSE-AI department team in one place.
           </p>
         </div>
       </section>

@@ -5,16 +5,16 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 const DEFAULTS: Record<string, string> = {
-  hero_badge: "Open for new members — Spring 2026",
-  hero_headline_1: "Where students build",
-  hero_headline_2: "real things.",
-  hero_subtext: "A community of developers, designers, and tech enthusiasts pushing boundaries through hackathons, workshops, and open-source.",
-  hero_cta_primary: "Join the Club",
+  hero_badge: "CSE-AI Department Pilot Launch",
+  hero_headline_1: "CSE-AI Student Hub",
+  hero_headline_2: "Build. Share. Innovate.",
+  hero_subtext: "The official platform for students of Computer Science & Engineering (AI) to showcase projects, access resources, and stay updated on department events.",
+  hero_cta_primary: "Get Started",
   hero_cta_secondary: "Explore Projects",
-  stat_members: "200+",
-  stat_events: "50+",
-  stat_projects: "100+",
-  stat_wins: "25+",
+  stat_members: "CSE-AI",
+  stat_events: "Active",
+  stat_projects: "Student",
+  stat_wins: "Community",
 };
 
 const HeroSection = () => {

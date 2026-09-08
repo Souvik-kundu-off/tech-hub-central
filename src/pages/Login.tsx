@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 
+
 const Login = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -15,12 +16,15 @@ const Login = () => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: window.location.origin + "/onboarding",
+          redirectTo: `${window.location.origin}/dashboard`,
+          queryParams: {
+            prompt: "select_account",
+          },
         },
       });
       if (error) throw error;
-    } catch (error: any) {
-      toast.error(error.message || "Failed to connect to Google");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to sign in with Google");
       setLoading(false);
     }
   };
@@ -47,11 +51,11 @@ const Login = () => {
       <div className="w-full max-w-[440px] relative z-10 animate-in fade-in zoom-in-95 duration-500">
         <div className="bg-card/70 backdrop-blur-2xl border border-white/10 dark:border-white/5 shadow-2xl rounded-3xl p-8 sm:p-10">
           <div className="text-center mb-10">
-            <Link to="/" className="inline-block mb-8 group">
+            <Link to="/" className="inline-block mb-6 group">
               <img
-                src="/Uni logo/full techclub-transparent.png"
-                alt="TechClub"
-                className="h-16 w-auto mx-auto drop-shadow-sm transition-transform duration-300 group-hover:scale-105"
+                src="/Uni logo/CSE_AI_WHITE_LOGO_FULL.png"
+                alt="CSE-AI Student Hub"
+                className="h-14 sm:h-16 w-auto mx-auto drop-shadow-sm transition-transform duration-300 group-hover:scale-105"
               />
             </Link>
             <h1 className="text-2xl font-bold tracking-tight text-foreground mb-2">Welcome Back</h1>

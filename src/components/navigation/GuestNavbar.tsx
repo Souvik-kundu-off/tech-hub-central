@@ -35,9 +35,9 @@ const GuestNavbar = () => {
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center group">
             <img
-              src="/Uni logo/full techclub-transparent.png"
-              alt="TechClub"
-              className="h-12 sm:h-16 w-auto transition-transform group-hover:scale-105"
+              src="/Uni logo/CSE_AI_WHITE_LOGO_FULL.png"
+              alt="CSE-AI Student Hub"
+              className="h-10 sm:h-12 md:h-14 w-auto transition-transform group-hover:scale-105"
             />
           </Link>
 

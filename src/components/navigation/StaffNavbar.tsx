@@ -75,9 +75,9 @@ const StaffNavbar = () => {
           {/* Logo */}
           <Link to="/admin" className="flex items-center gap-2 group shrink-0">
             <img
-              src="/Uni logo/full techclub-transparent.png"
-              alt="TechClub"
-              className="h-12 sm:h-16 w-auto transition-transform group-hover:scale-105"
+              src="/Uni logo/CSE_AI_WHITE_LOGO_FULL.png"
+              alt="CSE-AI Student Hub"
+              className="h-10 sm:h-12 md:h-14 w-auto transition-transform group-hover:scale-105"
             />
             <span className="hidden md:inline-flex items-center px-2 py-0.5 rounded-md bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider">
               {roleLabel}

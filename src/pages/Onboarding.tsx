@@ -106,7 +106,7 @@ const Onboarding = () => {
             <User className="w-8 h-8 text-primary" />
           </div>
           <h1 className="text-3xl font-bold tracking-tight mb-2">Complete your profile.</h1>
-          <p className="text-muted-foreground">Welcome to TechClub! Tell us a bit more about yourself to get started.</p>
+          <p className="text-muted-foreground">Welcome to CSE-AI Student Hub! Tell us a bit more about yourself to get started.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8 bg-card border border-border rounded-3xl p-8 shadow-sm">

@@ -47,14 +47,14 @@ const Signup = () => {
       <div className="w-full max-w-[440px] relative z-10 animate-in fade-in zoom-in-95 duration-500">
         <div className="bg-card/70 backdrop-blur-2xl border border-white/10 dark:border-white/5 shadow-2xl rounded-3xl p-8 sm:p-10">
           <div className="text-center mb-10">
-            <Link to="/" className="inline-block mb-8 group">
+            <Link to="/" className="inline-block mb-6 group">
               <img
-                src="/Uni logo/full techclub-transparent.png"
-                alt="TechClub"
-                className="h-16 w-auto mx-auto drop-shadow-sm transition-transform duration-300 group-hover:scale-105"
+                src="/Uni logo/CSE_AI_WHITE_LOGO_FULL.png"
+                alt="CSE-AI Student Hub"
+                className="h-14 sm:h-16 w-auto mx-auto drop-shadow-sm transition-transform duration-300 group-hover:scale-105"
               />
             </Link>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground mb-2">Join TechClub</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground mb-2">Join CSE-AI Student Hub</h1>
             <p className="text-sm text-muted-foreground">
               Sign up using your college Google account.
             </p>

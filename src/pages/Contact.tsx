@@ -120,8 +120,8 @@ const Contact = () => {
               <h2 className="font-semibold text-lg mb-6">Other ways to reach us</h2>
               <div className="space-y-4">
                 {[
-                  { icon: Mail, label: "Email", value: "hello@techclub.dev", href: "mailto:hello@techclub.dev" },
-                  { icon: MapPin, label: "Location", value: "CS Department, Your College", href: "#" },
+                  { icon: Mail, label: "Email", value: "cse-ai@university.edu", href: "mailto:cse-ai@university.edu" },
+                  { icon: MapPin, label: "Location", value: "Department of CSE-AI, Main Campus", href: "#" },
                   { icon: Phone, label: "Phone", value: "+91 98765 43210", href: "tel:+919876543210" },
                 ].map((item, i) => (
                   <a key={i} href={item.href} className="flex items-start gap-3 border border-border rounded-lg p-4 bg-card hover:border-foreground/20 transition-colors">

@@ -29,7 +29,7 @@ const About = () => (
         <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1.5">About Us</p>
         <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">We build builders.</h1>
         <p className="text-muted-foreground text-[15px] max-w-lg mx-auto">
-          TechClub is a student-run community dedicated to creating real impact through technology, collaboration, and continuous learning.
+          The CSE-AI Student Hub is dedicated to fostering project showcase, peer collaboration, and technical growth for students of Computer Science & Engineering (AI).
         </p>
       </div>
     </section>
@@ -41,14 +41,14 @@ const About = () => (
           <Target className="w-6 h-6 text-primary mb-4" />
           <h3 className="font-semibold text-lg mb-2">Our Mission</h3>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            To empower students with practical technical skills, foster innovation through hands-on projects, and create a supportive community that prepares members for the tech industry.
+            To empower CSE-AI students with practical technical skills, foster innovation through student-led projects, and build a vibrant departmental community.
           </p>
         </div>
         <div className="border border-border rounded-lg p-8 bg-card">
           <Eye className="w-6 h-6 text-primary mb-4" />
           <h3 className="font-semibold text-lg mb-2">Our Vision</h3>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            To become the most impactful student tech community — producing innovators who solve real problems and contribute meaningfully to the global tech ecosystem.
+            To become a benchmark departmental student hub — enabling students to build impactful software, collaborate on ideas, and showcase their technical excellence.
           </p>
         </div>
       </div>
@@ -85,8 +85,8 @@ const About = () => (
     <section className="section-padding border-b border-border">
       <div className="container mx-auto px-4">
         <div className="section-header">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1.5">Achievements</p>
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">What we've accomplished</h2>
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1.5">Highlights</p>
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Departmental Activities</h2>
         </div>
         <div className="grid md:grid-cols-2 gap-3 max-w-3xl mx-auto">
           {achievements.map((a, i) => (
@@ -99,13 +99,13 @@ const About = () => (
     {/* Why Join */}
     <section className="section-padding">
       <div className="container mx-auto px-4 text-center">
-        <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-4">Why join TechClub?</h2>
+        <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-4">Join CSE-AI Student Hub</h2>
         <p className="text-muted-foreground text-[15px] max-w-md mx-auto mb-8">
-          Gain hands-on experience, build your portfolio, meet like-minded peers, and get mentored by industry professionals — all while having fun.
+          Share your projects, access study resources, stay updated on department events, and connect with fellow students.
         </p>
         <Link to="/signup">
           <Button className="bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-6 text-sm">
-            Join Now <ArrowRight className="w-4 h-4 ml-1.5" />
+            Get Started <ArrowRight className="w-4 h-4 ml-1.5" />
           </Button>
         </Link>
       </div>

@@ -8,17 +8,17 @@ const Footer = () => (
         <div className="col-span-2 md:col-span-1">
           <div className="flex items-center gap-2 mb-3">
             <img
-              src="/Uni logo/full techclub-transparent.png"
-              alt="TechClub"
-              className="h-16 sm:h-20 md:h-25 w-auto"
+              src="/Uni logo/CSE_AI_WHITE_LOGO_FULL.png"
+              alt="CSE-AI Student Hub"
+              className="h-14 sm:h-18 w-auto"
             />
           </div>
           <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-            Building the future, one project at a time.
+            Official project & innovation hub for CSE-AI students.
           </p>
-          <a href="mailto:contact@techclub.com" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+          <a href="mailto:cse-ai@university.edu" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
             <Mail className="w-4 h-4" />
-            <span>contact@techclub.com</span>
+            <span>cse-ai@university.edu</span>
           </a>
         </div>
 
@@ -55,7 +55,7 @@ const Footer = () => (
         />
       </div>
       <div className="border-t border-border mt-6 pt-6 flex flex-col sm:flex-row justify-between items-center gap-2">
-        <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} TechClub. All rights reserved.</p>
+        <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} CSE-AI Student Hub. Department of CSE-AI.</p>
         <p className="text-xs text-muted-foreground">Built by students. Powered by ideas.</p>
       </div>
     </div>

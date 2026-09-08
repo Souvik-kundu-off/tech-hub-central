@@ -37,7 +37,7 @@ const GSCSection = () => (
                 We are an official Google Student Community
               </h3>
               <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                TechClub is proud to host a Google Student Community on campus, led by our Google Student Ambassador.
+                CSE-AI Student Hub is proud to host a Google Student Community on campus, led by our Google Student Ambassador.
                 Join us for exclusive Google-powered workshops, study jams, and tech events.
               </p>
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">

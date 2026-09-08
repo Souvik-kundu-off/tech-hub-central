@@ -37,7 +37,7 @@ const Blog = () => {
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1.5">Blog</p>
           <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">Updates & insights.</h1>
           <p className="text-muted-foreground text-[15px] max-w-md mx-auto">
-            Announcements, articles, and event recaps from the TechClub community.
+            Announcements, articles, and event recaps from the CSE-AI department community.
           </p>
         </div>
       </section>

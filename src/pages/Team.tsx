@@ -42,7 +42,7 @@ const Team = () => {
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1.5">Team</p>
           <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">The people behind it all.</h1>
           <p className="text-muted-foreground text-[15px] max-w-md mx-auto">
-            Meet the students and mentors who make TechClub possible.
+            Meet the students, coordinators, and mentors who make CSE-AI Student Hub possible.
           </p>
         </div>
       </section>
