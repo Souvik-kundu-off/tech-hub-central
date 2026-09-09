@@ -23,9 +23,12 @@ const MemberNavbar = () => {
     { label: "Dashboard", href: "/dashboard" },
     { label: "Projects", href: "/projects" },
     { label: "Events", href: "/events" },
-    { label: "Blog", href: "/blog" },
-    { label: "Broadcasts", href: "/broadcasts" },
     { label: "Resources", href: "/resources" },
+    { label: "Blog", href: "/blog" },
+    { label: "Gallery", href: "/gallery" },
+    { label: "Team", href: "/team" },
+    { label: "Contact", href: "/contact" },
+    { label: "Broadcasts", href: "/broadcasts" },
     { label: "Leaderboard", href: "/leaderboard" },
   ];
 

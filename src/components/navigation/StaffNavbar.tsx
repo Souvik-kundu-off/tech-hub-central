@@ -39,8 +39,10 @@ const PUBLIC_LINKS = [
   { label: "Events", href: "/events" },
   { label: "Resources", href: "/resources" },
   { label: "Blog", href: "/blog" },
-  { label: "Broadcasts", href: "/broadcasts" },
+  { label: "Gallery", href: "/gallery" },
   { label: "Team", href: "/team" },
+  { label: "Contact", href: "/contact" },
+  { label: "Broadcasts", href: "/broadcasts" },
 ];
 
 const StaffNavbar = () => {
