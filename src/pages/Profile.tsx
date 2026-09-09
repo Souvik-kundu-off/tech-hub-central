@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
-import { ensureUrl } from "@/lib/utils-url";
+import { ensureUrl, isValidGithubUrl, isValidLinkedinUrl, normalizeSocialUrl } from "@/lib/utils-url";
 import PageLayout from "@/components/PageLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -76,7 +76,21 @@ const Profile = () => {
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (formData.github_url && !isValidGithubUrl(formData.github_url)) {
+      toast.error("Invalid GitHub URL. Example: github.com/username");
+      return;
+    }
+
+    if (formData.linkedin_url && !isValidLinkedinUrl(formData.linkedin_url)) {
+      toast.error("Invalid LinkedIn URL. Example: linkedin.com/in/username");
+      return;
+    }
+
     setSaving(true);
+
+    const normalizedGithub = normalizeSocialUrl(formData.github_url);
+    const normalizedLinkedin = normalizeSocialUrl(formData.linkedin_url);
 
     try {
       const { error } = await supabase
@@ -86,14 +100,14 @@ const Profile = () => {
           student_code: formData.student_code,
           programme_name: formData.programme_name,
           phone_number: formData.phone_number,
-          github_url: formData.github_url,
-          linkedin_url: formData.linkedin_url,
+          github_url: normalizedGithub,
+          linkedin_url: normalizedLinkedin,
         })
         .eq("id", profile?.id);
 
       if (error) throw error;
 
-      setProfile({ ...profile!, ...formData as ProfileData });
+      setProfile({ ...profile!, ...formData as ProfileData, github_url: normalizedGithub, linkedin_url: normalizedLinkedin });
       setEditing(false);
       toast.success("Profile updated successfully!");
     } catch (error: any) {

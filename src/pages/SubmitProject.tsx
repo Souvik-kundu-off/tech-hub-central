@@ -15,7 +15,7 @@ import {
   Loader2, Save, Send, Github, Globe, Image as ImageIcon, X, Plus, ArrowLeft,
 } from "lucide-react";
 import { z } from "zod";
-import CloudinaryMultiUpload from "@/components/ui/CloudinaryMultiUpload";
+import { isValidGithubUrl, normalizeSocialUrl } from "@/lib/utils-url";
 
 const projectSchema = z.object({
   title: z.string().trim().min(3, "Title must be at least 3 characters").max(100),
@@ -96,15 +96,16 @@ const SubmitProject = () => {
   const removeChip = (i: number, list: string[], setList: (v: string[]) => void) => {
     setList(list.filter((_, idx) => idx !== i));
   };
-
-
-
   const save = async (status: "draft" | "pending") => {
     if (!user || !profile) return;
     if (status === "pending") {
       const result = projectSchema.safeParse(form);
       if (!result.success) {
         toast.error(result.error.issues[0].message);
+        return;
+      }
+      if (form.github_url && !isValidGithubUrl(form.github_url)) {
+        toast.error("Please enter a valid GitHub repository URL (e.g. github.com/username/repository)");
         return;
       }
       if (stack.length === 0) {
@@ -116,6 +117,8 @@ const SubmitProject = () => {
 
     const payload = {
       ...form,
+      github_url: normalizeSocialUrl(form.github_url),
+      live_url: normalizeSocialUrl(form.live_url),
       stack,
       tags,
       team_members: team,

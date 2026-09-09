@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Loader2, User, BookOpen, Hash, Phone, Mail, Github, Linkedin, CheckCircle2 } from "lucide-react";
 
+import { isValidGithubUrl, isValidLinkedinUrl, normalizeSocialUrl } from "@/lib/utils-url";
 import { useAuth } from "@/contexts/AuthContext";
 
 const Onboarding = () => {
@@ -39,7 +40,6 @@ const Onboarding = () => {
         ...prev,
         email: session?.user?.email || prev.email,
         full_name: profile.full_name || prev.full_name,
-        // Don't overwrite if user started typing? Basic pre-fill logic:
       }));
     }
   }, [authLoading, session, profile, navigate]);
@@ -47,22 +47,36 @@ const Onboarding = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (formData.github_url && !isValidGithubUrl(formData.github_url)) {
+      toast.error("Invalid GitHub URL. Example: github.com/username");
+      return;
+    }
+
+    if (formData.linkedin_url && !isValidLinkedinUrl(formData.linkedin_url)) {
+      toast.error("Invalid LinkedIn URL. Example: linkedin.com/in/username");
+      return;
+    }
+
     setSubmitting(true);
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("No user found");
 
+      const normalizedGithub = normalizeSocialUrl(formData.github_url);
+      const normalizedLinkedin = normalizeSocialUrl(formData.linkedin_url);
+
       const { error } = await supabase
         .from("profiles")
         .upsert({
-          id: user.id, // ID is required for upsert
+          id: user.id,
           full_name: formData.full_name,
           student_code: formData.student_code,
           programme_name: formData.programme_name,
           phone_number: formData.phone_number,
-          github_url: formData.github_url,
-          linkedin_url: formData.linkedin_url,
+          github_url: normalizedGithub,
+          linkedin_url: normalizedLinkedin,
         });
 
       if (error) throw error;
