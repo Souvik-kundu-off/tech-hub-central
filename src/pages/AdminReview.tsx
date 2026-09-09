@@ -151,8 +151,8 @@ const AdminReview = () => {
       <PageLayout>
         <div className="flex flex-col items-center justify-center py-40">
           <AlertCircle size={48} className="text-destructive mb-4" />
-          <h1 className="text-2xl font-bold">Access Denied</h1>
-          <p className="text-muted-foreground">This area is for Nexus Overseers only.</p>
+          <h1 className="text-2xl font-bold mb-2">Access Restricted</h1>
+          <p className="text-muted-foreground">This area is for Department Staff only.</p>
         </div>
       </PageLayout>
     );

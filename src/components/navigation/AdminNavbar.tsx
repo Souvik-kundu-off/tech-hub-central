@@ -127,7 +127,7 @@ const AdminNavbar = () => {
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-semibold leading-none">{profile?.full_name}</p>
-                    <p className="text-xs leading-none text-muted-foreground">Nexus Administrator</p>
+                    <p className="text-xs leading-none text-muted-foreground">Department Administrator</p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import {
-  Home, Save, Loader2, Eye, RotateCcw, Sparkles
+  Home, Save, Loader2, Eye, RotateCcw
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -153,8 +153,8 @@ const HomepageEditor = ({ readonly = false }: { readonly?: boolean }) => {
         animate={{ opacity: 1, y: 0 }}
         className="border border-white/10 rounded-[28px] p-6 md:p-8 bg-card/50 space-y-6"
       >
-        <h3 className="font-bold text-sm flex items-center gap-2">
-          <Sparkles size={14} className="text-primary" /> Hero Section
+        <h3 className="font-bold text-sm">
+          Hero Section
         </h3>
         <div className="grid md:grid-cols-2 gap-5">
           {CONTENT_FIELDS.filter(f => f.key.startsWith("hero_")).map(field => (

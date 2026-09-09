@@ -108,7 +108,7 @@ const MemberManager = ({ readonly = false, canManageRoles = false }: { readonly?
         user_id: memberId,
         amount: amount,
         action_type: "ADMIN_ADJUSTMENT",
-        description: `Manual adjustment by Nexus Overseer: ${amount > 0 ? '+' : ''}${amount} pts`
+        description: `Manual adjustment by Staff: ${amount > 0 ? '+' : ''}${amount} pts`
       }]);
 
       setMembers(prev => prev.map(m => m.id === memberId ? { ...m, points: m.points + amount } : m));
@@ -340,7 +340,7 @@ const MemberManager = ({ readonly = false, canManageRoles = false }: { readonly?
                       </div>
                     </td>
                     <td className="p-4">
-                      <span className="text-[11px] font-medium text-muted-foreground">{member.programme_name || "Nexus Explorer"}</span>
+                      <span className="text-[11px] font-medium text-muted-foreground">{member.programme_name || "CSE-AI Member"}</span>
                     </td>
                     <td className="p-4">
                       <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-black uppercase ${ROLE_BADGE[member.role] || "bg-white/5 text-muted-foreground"}`}>

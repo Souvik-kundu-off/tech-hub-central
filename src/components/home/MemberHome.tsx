@@ -10,7 +10,6 @@ import {
   BookOpen, 
   User, 
   ArrowRight,
-  Sparkles,
   Zap,
   Star,
   Globe,
@@ -167,7 +166,7 @@ const MemberHome = () => {
   }, [authLoading, user]);
 
   const getRank = (points: number) => {
-    if (points >= 1000) return { name: "Nexus Legend", icon: Star, color: "text-amber-500", progress: 100 };
+    if (points >= 1000) return { name: "Hub Legend", icon: Star, color: "text-amber-500", progress: 100 };
     if (points >= 500) return { name: "Architect", icon: Award, color: "text-purple-500", progress: ((points - 500) / 500) * 100 };
     if (points >= 200) return { name: "Innovator", icon: Zap, color: "text-indigo-500", progress: ((points - 200) / 300) * 100 };
     if (points >= 50) return { name: "Builder", icon: Layout, color: "text-blue-500", progress: ((points - 50) / 150) * 100 };
@@ -214,15 +213,14 @@ const MemberHome = () => {
           >
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/20 rounded-full text-[10px] font-bold uppercase tracking-widest text-primary mb-4">
-                <Sparkles size={12} />
-                Nexus Command Center
+                Student Command Center
               </div>
               <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-2">
                 Hey, <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-indigo-400">{profile?.full_name?.split(" ")[0]}</span>
               </h1>
               <p className="text-muted-foreground flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Working as <span className="text-foreground font-semibold">{profile?.role === 'admin' ? 'Nexus Overseer' : 'Tech Explorer'}</span>
+                Working as <span className="text-foreground font-semibold">{profile?.role === 'admin' ? 'Department Staff' : 'Tech Explorer'}</span>
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-3">
@@ -379,7 +377,7 @@ const MemberHome = () => {
                <Code size={32} />
             </div>
             <div className="flex-1 min-w-0">
-               <p className="text-[10px] font-black uppercase text-emerald-500 tracking-widest mb-1">Nexus Spotlight</p>
+               <p className="text-[10px] font-black uppercase text-emerald-500 tracking-widest mb-1">Student Spotlight</p>
                {spotlightProject ? (
                  <>
                    <h4 className="text-base font-bold truncate mb-1">{spotlightProject.title}</h4>
@@ -414,7 +412,7 @@ const MemberHome = () => {
              </div>
              <div>
                 <h4 className="text-sm font-bold truncate mb-1">{nextEvent?.title || "Workshop Secret"}</h4>
-                <p className="text-[10px] text-muted-foreground truncate">{nextEvent?.type || "Nexus Academy"}</p>
+                <p className="text-[10px] text-muted-foreground truncate">{nextEvent?.type || "Department Session"}</p>
              </div>
              <div className="absolute right-[-10px] bottom-[-10px] opacity-10 group-hover:scale-110 transition-transform">
                 <Calendar size={80} className="text-indigo-400" />
