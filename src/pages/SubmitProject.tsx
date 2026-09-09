@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { z } from "zod";
 import { isValidGithubUrl, normalizeSocialUrl } from "@/lib/utils-url";
+import CloudinaryMultiUpload from "@/components/ui/CloudinaryMultiUpload";
 
 const projectSchema = z.object({
   title: z.string().trim().min(3, "Title must be at least 3 characters").max(100),
