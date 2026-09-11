@@ -17,7 +17,6 @@ const Signup = () => {
         options: {
           redirectTo: window.location.origin + "/onboarding",
           queryParams: {
-            hd: "brainwareuniversity.ac.in",
             prompt: "select_account",
           },
         },
