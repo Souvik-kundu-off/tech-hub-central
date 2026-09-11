@@ -16,6 +16,10 @@ const Signup = () => {
         provider: "google",
         options: {
           redirectTo: window.location.origin + "/onboarding",
+          queryParams: {
+            hd: "brainwareuniversity.ac.in",
+            prompt: "select_account",
+          },
         },
       });
       if (error) throw error;

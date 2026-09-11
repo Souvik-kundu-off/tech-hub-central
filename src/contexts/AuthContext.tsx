@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
+import { isEmailAllowedForRegistration, ALLOWED_UNIVERSITY_DOMAIN } from "@/lib/auth-policy";
 
 interface Profile {
   full_name: string;
@@ -35,7 +37,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
   const [authReady, setAuthReady] = useState(false);
 
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = async (userId: string, currentUserEmail?: string | null) => {
     try {
       console.log(`Auth: Fetching profile for ${userId}...`);
       const { data, error } = await supabase
@@ -51,10 +53,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       if (data) {
-        console.log("Auth: Profile loaded successfully", data.role);
+        console.log("Auth: Existing profile loaded successfully", data.role);
         setProfile(data);
       } else {
-        console.warn("Auth: No profile row found in database");
+        // No existing profile row found -> This is a NEW sign-up attempt!
+        console.warn("Auth: No profile row found in database for user:", currentUserEmail);
+        if (!isEmailAllowedForRegistration(currentUserEmail)) {
+          console.error(`Auth: Blocking new sign-up attempt from unauthorized email: ${currentUserEmail}`);
+          toast.error(
+            `Registration Restricted: Only official @${ALLOWED_UNIVERSITY_DOMAIN} emails can sign up.`,
+            { duration: 6000 }
+          );
+          await supabase.auth.signOut();
+          setSession(null);
+          setUser(null);
+          setProfile(null);
+          return;
+        }
         setProfile(null);
       }
     } catch (error) {
@@ -89,7 +104,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       lastUserId.current = nextUser.id;
-      void fetchProfile(nextUser.id).finally(() => {
+      void fetchProfile(nextUser.id, nextUser.email).finally(() => {
         if (mounted) {
           setLoading(false);
         }
@@ -138,7 +153,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const refreshProfile = async () => {
     if (user) {
-      await fetchProfile(user.id);
+      await fetchProfile(user.id, user.email);
     }
   };
 

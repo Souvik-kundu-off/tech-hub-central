@@ -18,6 +18,7 @@ const Login = () => {
         options: {
           redirectTo: `${window.location.origin}/dashboard`,
           queryParams: {
+            hd: "brainwareuniversity.ac.in",
             prompt: "select_account",
           },
         },
