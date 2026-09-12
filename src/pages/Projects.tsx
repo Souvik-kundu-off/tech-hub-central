@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import PageLayout from "@/components/PageLayout";
-import { Search, Github, ExternalLink, Loader2, Plus, FolderOpen, User2, Eye, Heart, Image as ImageIcon } from "lucide-react";
+import { Search, Github, ExternalLink, Loader2, Plus, FolderOpen, User2, Eye, Heart, Image as ImageIcon, Video } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -21,6 +21,7 @@ interface Project {
   status: string;
   github_url: string;
   live_url: string;
+  youtube_url?: string | null;
   images: string[];
   views_count: number | null;
   likes_count: number | null;
@@ -209,8 +210,13 @@ const Projects = () => {
 
                   <div className="p-5 flex flex-col flex-1">
                     <div className="flex items-center justify-between mb-2 gap-2">
-                      <div className="flex items-center gap-2 flex-wrap min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap min-w-0">
                         {p.category && <span className="text-[11px] font-medium uppercase tracking-wider text-primary">{p.category}</span>}
+                        {p.youtube_url && (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded-full" title="Includes Video Demo">
+                            <Video className="w-2.5 h-2.5" /> Video
+                          </span>
+                        )}
                         {tab === "mine" && p.status !== "approved" && (
                           <span className={`text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded ${
                             p.status === "pending" ? "bg-blue-500/10 text-blue-500"

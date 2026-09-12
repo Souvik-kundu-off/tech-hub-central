@@ -5,10 +5,12 @@ import { ensureUrl } from "@/lib/utils-url";
 import { useAuth } from "@/contexts/AuthContext";
 import PageLayout from "@/components/PageLayout";
 import { Button } from "@/components/ui/button";
+import { getYouTubeEmbedUrl } from "@/lib/youtube-utils";
 import {
   Github, ExternalLink, Loader2, ArrowLeft, Users, Tag,
   Calendar, CheckCircle2, Clock, AlertCircle, FileEdit,
   MessageSquare, RefreshCw, Eye, Heart, ChevronLeft, ChevronRight,
+  Video, Image as ImageIcon,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
@@ -29,6 +31,7 @@ interface Project {
   review_note: string | null;
   github_url: string | null;
   live_url: string | null;
+  youtube_url: string | null;
   views_count: number | null;
   likes_count: number | null;
   created_at: string;
@@ -58,6 +61,7 @@ const ProjectDetail = () => {
   const [loading, setLoading] = useState(true);
   const [imgIdx, setImgIdx] = useState(0);
   const [resubmitting, setResubmitting] = useState(false);
+  const [activeMediaTab, setActiveMediaTab] = useState<"video" | "images">("video");
 
   useEffect(() => {
     if (!id) return;
@@ -256,77 +260,133 @@ const ProjectDetail = () => {
           </div>
         )}
 
-        {/* Image Gallery */}
-        {images.length > 0 && (
-          <div className="mb-8 relative">
-            {/* Main image */}
-            <div className="relative aspect-[4/3] sm:aspect-video w-full rounded-xl sm:rounded-2xl overflow-hidden bg-accent border border-white/5">
-              <AnimatePresence mode="wait">
-                <motion.img
-                  key={imgIdx}
-                  src={images[imgIdx]}
-                  alt={`${project.title} screenshot ${imgIdx + 1}`}
-                  className="w-full h-full object-cover"
-                  initial={{ opacity: 0, scale: 1.02 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.25 }}
-                />
-              </AnimatePresence>
+        {/* Hero Media Container (Video Demo + Screenshots) */}
+        {(() => {
+          const youtubeEmbedUrl = getYouTubeEmbedUrl(project.youtube_url);
+          const hasVideo = !!youtubeEmbedUrl;
+          const hasImages = images.length > 0;
 
-              {/* Nav arrows */}
-              {images.length > 1 && (
-                <>
-                  <button
-                    onClick={() => setImgIdx((i) => (i - 1 + images.length) % images.length)}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/70 transition-colors"
-                  >
-                    <ChevronLeft size={18} />
-                  </button>
-                  <button
-                    onClick={() => setImgIdx((i) => (i + 1) % images.length)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/70 transition-colors"
-                  >
-                    <ChevronRight size={18} />
-                  </button>
-                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-                    {images.map((_, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setImgIdx(i)}
-                        className={`w-1.5 h-1.5 rounded-full transition-all ${i === imgIdx ? "bg-white w-4" : "bg-white/40"}`}
-                      />
-                    ))}
-                  </div>
-                </>
-              )}
+          if (!hasVideo && !hasImages) return null;
 
-              {/* Image count badge */}
-              {images.length > 1 && (
-                <span className="absolute top-3 right-3 text-[10px] font-bold bg-black/60 backdrop-blur text-white px-2 py-1 rounded-full">
-                  {imgIdx + 1} / {images.length}
-                </span>
-              )}
-            </div>
+          // Automatically default to video if available and images exist
+          const showVideo = hasVideo && (activeMediaTab === "video" || !hasImages);
 
-            {/* Thumbnail strip */}
-            {images.length > 1 && (
-              <div className="flex gap-2 mt-3 overflow-x-auto pb-1">
-                {images.map((img, i) => (
+          return (
+            <div className="mb-8 relative">
+              {/* Media Switcher Tabs (if both video and screenshots exist) */}
+              {hasVideo && hasImages && (
+                <div className="flex items-center gap-2 mb-3">
                   <button
-                    key={i}
-                    onClick={() => setImgIdx(i)}
-                    className={`shrink-0 w-20 h-14 rounded-xl overflow-hidden border-2 transition-all ${
-                      i === imgIdx ? "border-primary" : "border-transparent opacity-60 hover:opacity-100"
+                    type="button"
+                    onClick={() => setActiveMediaTab("video")}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+                      showVideo
+                        ? "bg-red-500 text-white shadow-md shadow-red-500/20"
+                        : "bg-accent/60 hover:bg-accent text-muted-foreground hover:text-foreground"
                     }`}
                   >
-                    <img src={img} alt={`thumb-${i}`} className="w-full h-full object-cover" />
+                    <Video className="w-3.5 h-3.5" /> Video Demo
                   </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+                  <button
+                    type="button"
+                    onClick={() => setActiveMediaTab("images")}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+                      !showVideo
+                        ? "bg-primary text-primary-foreground shadow-md"
+                        : "bg-accent/60 hover:bg-accent text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <ImageIcon className="w-3.5 h-3.5" /> Screenshots ({images.length})
+                  </button>
+                </div>
+              )}
+
+              {/* Video Embed Player */}
+              {showVideo ? (
+                <div className="relative aspect-video w-full rounded-xl sm:rounded-2xl overflow-hidden bg-black border border-white/10 shadow-xl">
+                  <iframe
+                    src={youtubeEmbedUrl!}
+                    title={`${project.title} Video Demo`}
+                    className="w-full h-full border-0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                  />
+                </div>
+              ) : (
+                /* Screenshots Carousel */
+                images.length > 0 && (
+                  <>
+                    <div className="relative aspect-[4/3] sm:aspect-video w-full rounded-xl sm:rounded-2xl overflow-hidden bg-accent border border-white/5">
+                      <AnimatePresence mode="wait">
+                        <motion.img
+                          key={imgIdx}
+                          src={images[imgIdx]}
+                          alt={`${project.title} screenshot ${imgIdx + 1}`}
+                          className="w-full h-full object-cover"
+                          initial={{ opacity: 0, scale: 1.02 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.25 }}
+                        />
+                      </AnimatePresence>
+
+                      {/* Nav arrows */}
+                      {images.length > 1 && (
+                        <>
+                          <button
+                            onClick={() => setImgIdx((i) => (i - 1 + images.length) % images.length)}
+                            className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/70 transition-colors"
+                          >
+                            <ChevronLeft size={18} />
+                          </button>
+                          <button
+                            onClick={() => setImgIdx((i) => (i + 1) % images.length)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/70 transition-colors"
+                          >
+                            <ChevronRight size={18} />
+                          </button>
+                          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                            {images.map((_, i) => (
+                              <button
+                                key={i}
+                                onClick={() => setImgIdx(i)}
+                                className={`w-1.5 h-1.5 rounded-full transition-all ${i === imgIdx ? "bg-white w-4" : "bg-white/40"}`}
+                              />
+                            ))}
+                          </div>
+                        </>
+                      )}
+
+                      {/* Image count badge */}
+                      {images.length > 1 && (
+                        <span className="absolute top-3 right-3 text-[10px] font-bold bg-black/60 backdrop-blur text-white px-2 py-1 rounded-full">
+                          {imgIdx + 1} / {images.length}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Thumbnail strip */}
+                    {images.length > 1 && (
+                      <div className="flex gap-2 mt-3 overflow-x-auto pb-1 scrollbar-none">
+                        {images.map((img, i) => (
+                          <button
+                            key={i}
+                            onClick={() => setImgIdx(i)}
+                            className={`relative aspect-video w-20 rounded-lg overflow-hidden shrink-0 border-2 transition-all ${
+                              i === imgIdx ? "border-primary shadow-md scale-105" : "border-transparent opacity-60 hover:opacity-100"
+                            }`}
+                          >
+                            <img src={img} alt={`Thumb ${i + 1}`} className="w-full h-full object-cover" />
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )
+              )}
+            </div>
+          );
+        })()}
 
         {/* Content Grid */}
         <div className="grid md:grid-cols-3 gap-6">
